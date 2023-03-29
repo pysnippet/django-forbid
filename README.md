@@ -14,6 +14,26 @@ Django app for forbidding access to some countries.
 python -m pip install django-forbid
 ```
 
+## Configuration
+
+Add the `django_forbid.apps.ForbidConfig` to your `INSTALLED_APPS` in your Django project's **settings.py** file.
+
+```python
+INSTALLED_APPS = [
+    ...,  # other apps
+    'django_forbid.apps.ForbidConfig',
+]
+```
+
+Also, add the `django_forbid.middleware.ForbidMiddleware` to the `MIDDLEWARE` list of the project.
+
+```python
+MIDDLEWARE = [
+    ...,  # other middlewares
+    'django_forbid.middleware.ForbidMiddleware',
+]
+```
+
 ## Contribute
 
 Any contribution is welcome. If you have any ideas or suggestions, feel free to open an issue or a pull request. And
