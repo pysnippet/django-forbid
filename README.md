@@ -34,6 +34,45 @@ MIDDLEWARE = [
 ]
 ```
 
+## Usage
+
+After connecting the Django Forbid to your project, you can define the set of desired countries or territories to be
+forbidden. And there are four setting variables for describing any of your specific needs:
+
+- `WHITELIST_COUNTRIES` and `WHITELIST_TERRITORIES` - Correspondingly, the list of countries and territories that are
+  allowed to access the site.
+- `FORBIDDEN_COUNTRIES` and `FORBIDDEN_TERRITORIES` - Correspondingly, the list of countries and territories that are
+  forbidden to access the site.
+
+Forbidden countries and territories have a higher priority than allowed ones. If a country or territory is in both
+lists, then the user will be forbidden. And if the user is not allowed to access the resource, it will be redirected to
+the `FORBIDDEN_URL` page if the variable is set in your Django project's settings.
+
+```python
+# Only US, GB, and EU countries are allowed to access the site.
+WHITELIST_COUNTRIES = ['US', 'GB']
+WHITELIST_TERRITORIES = ['EU']
+```
+
+Needs can be different, so you can use any combination of these variables to describe your special needs.
+
+```python
+# Forbid access for African countries and Russia, Belarus, and North Korea.
+FORBIDDEN_COUNTRIES = ['RU', 'BY', 'KP']
+FORBIDDEN_TERRITORIES = ['AF']
+```
+
+The available ISO 3166 alpha-2 country codes are listed in [here](https://www.iban.com/country-codes). And the available
+ISO continent codes are listed below:
+
+- `AF` - Africa
+- `AN` - Antarctica
+- `AS` - Asia
+- `EU` - Europe
+- `NA` - North America
+- `OC` - Oceania
+- `SA` - South America
+
 ## Contribute
 
 Any contribution is welcome. If you have any ideas or suggestions, feel free to open an issue or a pull request. And
