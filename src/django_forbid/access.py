@@ -6,16 +6,16 @@ from geoip2.errors import AddressNotFoundError
 
 
 class Rule:
-    # key in the geoip2 city object
-    # subclasses should override this
+    # Key in the geoip2 city object.
+    # Subclasses should override this.
     key = None
 
     def __init__(self, code):
-        # two-letter ISO 3166-1 alpha-2 code
+        # Two-letter ISO 3166-1 alpha-2 code.
         self.code = code
 
     def __call__(self, city):
-        """Check if the code is satisfied."""
+        """Checks if the code is satisfied."""
         return self.code == city.get(self.key)
 
 
@@ -28,14 +28,16 @@ class ContinentRule(Rule):
 
 
 class Access:
-    # variables in the settings module
-    # subclasses should override this
+    # Variables in the settings module.
+    # Subclasses should override this.
     countries = None
     territories = None
 
+    # Hold the singleton instance of GeoIP2.
+    geoip = GeoIP2(Path(__file__).resolve().parent / "geoip")
+
     def __init__(self):
         self.rules = []
-        self.geoip = GeoIP2(Path(__file__).resolve().parent / "geoip")
 
         for country in getattr(settings, self.countries, []):
             self.rules.append(CountryRule(country.upper()))
@@ -43,8 +45,8 @@ class Access:
         for territory in getattr(settings, self.territories, []):
             self.rules.append(ContinentRule(territory.upper()))
 
-    def is_granted(self, ip_address):
-        """Check if the IP address is in the access zone."""
+    def grants(self, ip_address):
+        """Checks if the IP address is in the white zone."""
         city = self.geoip.city(ip_address)
         return any(map(lambda rule: rule(city), self.rules))
 
@@ -53,44 +55,31 @@ class PermitAccess(Access):
     countries = "WHITELIST_COUNTRIES"
     territories = "WHITELIST_TERRITORIES"
 
-    def is_granted(self, ip_address):
-        """Check if the IP address is permitted."""
+    def grants(self, ip_address):
+        """Checks if the IP address is permitted."""
         try:
-            return super().is_granted(ip_address)
+            return not self.rules or super().grants(ip_address)
         except AddressNotFoundError:
-            return False
+            return getattr(settings, "DEBUG", False)
 
 
 class ForbidAccess(Access):
     countries = "FORBIDDEN_COUNTRIES"
     territories = "FORBIDDEN_TERRITORIES"
 
-    def is_granted(self, ip_address):
-        """Check if the IP address is forbidden."""
+    def grants(self, ip_address):
+        """Checks if the IP address is forbidden."""
         try:
-            return not super().is_granted(ip_address)
+            return not self.rules or not super().grants(ip_address)
         except AddressNotFoundError:
-            return False
+            return getattr(settings, "DEBUG", False)
 
 
-class AccessFactory:
-    permit = PermitAccess
-    forbid = ForbidAccess
+def grants_access(ip_address):
+    """Checks if the IP address is in the white zone."""
+    forbidder = ForbidAccess()
+    permitter = PermitAccess()
 
-    class PermitAll:
-        @staticmethod
-        def is_granted(_):
-            return True
-
-    @classmethod
-    def get_access(cls):
-        """Return the access object based on the settings."""
-
-        if hasattr(settings, cls.forbid.countries) or hasattr(settings, cls.forbid.territories):
-            return cls.forbid()
-
-        if hasattr(settings, cls.permit.countries) or hasattr(settings, cls.permit.territories):
-            return cls.permit()
-
-        # if no settings are provided, permit all
-        return cls.PermitAll()
+    if forbidder.grants(ip_address):
+        return permitter.grants(ip_address)
+    return False
