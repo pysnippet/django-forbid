@@ -43,7 +43,7 @@ class Access:
         for territory in getattr(settings, self.territories, []):
             self.rules.append(ContinentRule(territory.upper()))
 
-    def check(self, ip_address):
+    def is_granted(self, ip_address):
         """Check if the IP address is in the access zone."""
         city = self.geoip.city(ip_address)
         return any(map(lambda rule: rule(city), self.rules))
@@ -53,10 +53,10 @@ class PermitAccess(Access):
     countries = "WHITELIST_COUNTRIES"
     territories = "WHITELIST_TERRITORIES"
 
-    def check(self, ip_address):
+    def is_granted(self, ip_address):
         """Check if the IP address is permitted."""
         try:
-            return super().check(ip_address)
+            return super().is_granted(ip_address)
         except AddressNotFoundError:
             return False
 
@@ -65,10 +65,10 @@ class ForbidAccess(Access):
     countries = "FORBIDDEN_COUNTRIES"
     territories = "FORBIDDEN_TERRITORIES"
 
-    def check(self, ip_address):
+    def is_granted(self, ip_address):
         """Check if the IP address is forbidden."""
         try:
-            return not super().check(ip_address)
+            return not super().is_granted(ip_address)
         except AddressNotFoundError:
             return False
 
@@ -79,7 +79,7 @@ class AccessFactory:
 
     class PermitAll:
         @staticmethod
-        def check(_):
+        def is_granted(_):
             return True
 
     @classmethod
