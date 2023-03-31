@@ -13,12 +13,12 @@ jobs:
       matrix:
         include:
           - python: "3.6"
-            env: py36-django20
+            env: py36-django21
             os: ubuntu-20.04  # 3.6 is not available on ubuntu-20.04
           - python: "3.8"
-            env: py38-django20
+            env: py38-django21
           - python: "3.9"
-            env: py39-django20
+            env: py39-django21
 
           - python: "3.6"
             env: py36-django32
