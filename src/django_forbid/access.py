@@ -75,9 +75,6 @@ class ForbidAccess(Access):
 
 def grants_access(ip_address):
     """Checks if the IP address is in the white zone."""
-    forbidder = ForbidAccess()
-    permitter = PermitAccess()
-
-    if forbidder.grants(ip_address):
-        return permitter.grants(ip_address)
+    if ForbidAccess().grants(ip_address):
+        return PermitAccess().grants(ip_address)
     return False

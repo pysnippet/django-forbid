@@ -3,10 +3,10 @@
 Django app for forbidding access to some countries.
 
 [![PyPI](https://img.shields.io/pypi/v/django-forbid.svg)](https://pypi.org/project/django-forbid/)
+[![Django](https://img.shields.io/badge/django-%3E%3D2.1-blue.svg)](https://pypi.org/project/django-forbid/)
+[![Python](https://img.shields.io/pypi/pyversions/django-forbid.svg)](https://pypi.org/project/django-forbid/)
 [![License](https://img.shields.io/pypi/l/django-forbid.svg)](https://github.com/pysnippet/django-forbid/blob/master/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
-
-[//]: # ([![Tests]&#40;https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg&#41;]&#40;https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml&#41;)
+[![Tests](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml)
 
 ## Install
 
@@ -36,7 +36,7 @@ MIDDLEWARE = [
 
 Configuring the `GEOIP_PATH` variable in your project's settings is important. This variable should contain the path to
 the GeoLite2 database file. You should [download](https://dev.maxmind.com/geoip/geoip2/geolite2/) the database and
-follow the Django [documentation](https://docs.djangoproject.com/en/2.0/ref/contrib/gis/geoip2/#settings) for proper
+follow the Django [documentation](https://docs.djangoproject.com/en/2.1/ref/contrib/gis/geoip2/#settings) for proper
 configuration.
 
 ## Usage
