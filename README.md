@@ -34,6 +34,11 @@ MIDDLEWARE = [
 ]
 ```
 
+Configuring the `GEOIP_PATH` variable in your project's settings is important. This variable should contain the path to
+the GeoLite2 database file. You should [download](https://dev.maxmind.com/geoip/geoip2/geolite2/) the database and
+follow the Django [documentation](https://docs.djangoproject.com/en/2.0/ref/contrib/gis/geoip2/#settings) for proper
+configuration.
+
 ## Usage
 
 After connecting the Django Forbid to your project, you can define the set of desired countries or territories to be
@@ -63,15 +68,8 @@ FORBIDDEN_TERRITORIES = ['AF']
 ```
 
 The available ISO 3166 alpha-2 country codes are listed in [here](https://www.iban.com/country-codes). And the available
-ISO continent codes are listed below:
-
-- `AF` - Africa
-- `AN` - Antarctica
-- `AS` - Asia
-- `EU` - Europe
-- `NA` - North America
-- `OC` - Oceania
-- `SA` - South America
+ISO continent codes are: `AF` - Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` -
+Oceania and `SA` - South America.
 
 ## Contribute
 

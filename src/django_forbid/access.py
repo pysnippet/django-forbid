@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
@@ -33,8 +31,8 @@ class Access:
     countries = None
     territories = None
 
-    # Hold the singleton instance of GeoIP2.
-    geoip = GeoIP2(Path(__file__).resolve().parent / "geoip")
+    # Hold the instance of GeoIP2.
+    geoip = GeoIP2()
 
     def __init__(self):
         self.rules = []
