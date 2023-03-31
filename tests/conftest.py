@@ -10,5 +10,6 @@ def pytest_configure():
         MIDDLEWARE=[
             "django_forbid.middleware.ForbidMiddleware"
         ],
-        GEOIP_PATH=Path(__file__).parent / "geoip",
+        # The `pathlib.Path` support was added after Django 3.0.
+        GEOIP_PATH=(Path(__file__).parent / "geoip").as_posix(),
     )
