@@ -6,9 +6,7 @@ Django app for forbidding access to some countries.
 [![Django](https://img.shields.io/badge/django-%3E%3D2.0-blue.svg)](https://pypi.org/project/django-forbid/)
 [![Python](https://img.shields.io/pypi/pyversions/django-forbid.svg)](https://pypi.org/project/django-forbid/)
 [![License](https://img.shields.io/pypi/l/django-forbid.svg)](https://github.com/pysnippet/django-forbid/blob/master/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
-
-[//]: # ([![Tests]&#40;https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg&#41;]&#40;https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml&#41;)
+[![Tests](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml)
 
 ## Install
 
