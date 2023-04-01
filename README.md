@@ -41,8 +41,8 @@ configuration.
 
 ## Usage
 
-After connecting the Django Forbid to your project, you can define the set of desired countries or territories to be
-forbidden. And there are four setting variables for describing any of your specific needs:
+After connecting the Django Forbid to your project, you can define the set of desired zones to be forbidden or allowed.
+And there are four setting variables for describing any of your specific needs:
 
 - `WHITELIST_COUNTRIES` and `WHITELIST_TERRITORIES` - Correspondingly, the list of countries and territories that are
   allowed to access the site.
@@ -70,6 +70,15 @@ FORBIDDEN_TERRITORIES = ['AF']
 The available ISO 3166 alpha-2 country codes are listed in [here](https://www.iban.com/country-codes). And the available
 ISO continent codes are: `AF` - Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` -
 Oceania and `SA` - South America.
+
+Without additional configuration, the middleware will check the user's access on every request. This can slow down the
+site. To avoid this, you can use the `FORBID_TIMEOUT` variable to set the cache timeout in seconds. When the timeout
+expires, the middleware will check the user's access again.
+
+```python
+# Check the user's access every 10 minutes.
+FORBID_TIMEOUT = 60 * 10
+```
 
 ## Contribute
 
