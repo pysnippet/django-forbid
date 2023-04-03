@@ -1,0 +1,15 @@
+<form id="detector" method="post">
+    {% csrf_token %}
+</form>
+<script type="text/javascript">
+    (() => {
+        const form = document.getElementById("detector");
+        const input = document.createElement("input");
+        input.setAttribute("type", "hidden");
+        input.setAttribute("name", "timezone");
+        input.setAttribute("value", Intl.DateTimeFormat().resolvedOptions().timeZone);
+        form.action = window.location.href;
+        form.appendChild(input);
+        form.submit();
+    })();
+</script>
