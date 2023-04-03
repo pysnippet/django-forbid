@@ -34,8 +34,9 @@ class Access:
     # Hold the instance of GeoIP2.
     geoip = GeoIP2()
 
-    def __init__(self):
+    def __init__(self, request):
         self.rules = []
+        self.request = request
 
         for country in getattr(settings, self.countries, []):
             self.rules.append(CountryRule(country.upper()))
@@ -46,6 +47,7 @@ class Access:
     def grants(self, ip_address):
         """Checks if the IP address is in the white zone."""
         city = self.geoip.city(ip_address)
+        self.request.session["tz"] = city.get("time_zone")
         return any(map(lambda rule: rule(city), self.rules))
 
 
@@ -73,8 +75,8 @@ class ForbidAccess(Access):
             return getattr(settings, "DEBUG", False)
 
 
-def grants_access(ip_address):
+def grants_access(request, ip_address):
     """Checks if the IP address is in the white zone."""
-    if ForbidAccess().grants(ip_address):
-        return PermitAccess().grants(ip_address)
+    if ForbidAccess(request).grants(ip_address):
+        return PermitAccess(request).grants(ip_address)
     return False
