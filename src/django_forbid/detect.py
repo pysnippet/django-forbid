@@ -9,8 +9,14 @@ from django.shortcuts import render
 def detect(get_response, request):
     response = get_response(request)
 
-    # Checks if VPN detection is disabled.
-    if not getattr(settings, "FORBID_VPN", False):
+    # Checks if VPN detection is disabled
+    # or if the `tz` session is not set.
+    if any([
+        # The session key is checked to avoid
+        # redirect loops in development mode.
+        not request.session.has_key("tz"),
+        not getattr(settings, "FORBID_VPN", False),
+    ]):
         return response
 
     # Usually, this happens when CSRF is invalid.
