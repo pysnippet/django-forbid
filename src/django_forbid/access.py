@@ -34,9 +34,8 @@ class Access:
     # Hold the instance of GeoIP2.
     geoip = GeoIP2()
 
-    def __init__(self, request):
+    def __init__(self):
         self.rules = []
-        self.request = request
 
         for country in getattr(settings, self.countries, []):
             self.rules.append(CountryRule(country.upper()))
@@ -44,39 +43,54 @@ class Access:
         for territory in getattr(settings, self.territories, []):
             self.rules.append(ContinentRule(territory.upper()))
 
-    def grants(self, ip_address):
+    def accessable(self, city):
         """Checks if the IP address is in the white zone."""
-        city = self.geoip.city(ip_address)
-        self.request.session["tz"] = city.get("time_zone")
         return any(map(lambda rule: rule(city), self.rules))
+
+    def grants(self, city):
+        """Checks if the IP address is permitted."""
+        raise NotImplementedError
 
 
 class PermitAccess(Access):
     countries = "WHITELIST_COUNTRIES"
     territories = "WHITELIST_TERRITORIES"
 
-    def grants(self, ip_address):
+    def grants(self, city):
         """Checks if the IP address is permitted."""
-        try:
-            return not self.rules or super().grants(ip_address)
-        except AddressNotFoundError:
-            return getattr(settings, "DEBUG", False)
+        return not self.rules or self.accessable(city)
 
 
 class ForbidAccess(Access):
     countries = "FORBIDDEN_COUNTRIES"
     territories = "FORBIDDEN_TERRITORIES"
 
-    def grants(self, ip_address):
+    def grants(self, city):
         """Checks if the IP address is forbidden."""
-        try:
-            return not self.rules or not super().grants(ip_address)
-        except AddressNotFoundError:
-            return getattr(settings, "DEBUG", False)
+        return not self.rules or not self.accessable(city)
 
 
 def grants_access(request, ip_address):
     """Checks if the IP address is in the white zone."""
-    if ForbidAccess(request).grants(ip_address):
-        return PermitAccess(request).grants(ip_address)
-    return False
+    try:
+        city = Access.geoip.city(ip_address)
+
+        # Saves the timezone in the session for
+        # comparing it with the timezone in the
+        # POST request sent from user's browser
+        # to detect if the user is using VPN.
+        timezone = city.get("time_zone")
+        request.session["tz"] = timezone
+
+        # First, checks if the IP address is not
+        # forbidden. If it is, False is returned
+        # otherwise, checks if the IP address is
+        # permitted.
+        if ForbidAccess().grants(city):
+            return PermitAccess().grants(city)
+        return False
+    except AddressNotFoundError:
+        # This happens when the IP address is not
+        # in  the  GeoIP2 database. Usually, this
+        # happens when the IP address is a local.
+        return getattr(settings, "DEBUG", False)
