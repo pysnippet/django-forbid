@@ -43,7 +43,7 @@ class Access:
         for territory in getattr(settings, self.territories, []):
             self.rules.append(ContinentRule(territory.upper()))
 
-    def accessable(self, city):
+    def accessible(self, city):
         """Checks if the IP address is in the white zone."""
         return any(map(lambda rule: rule(city), self.rules))
 
@@ -58,7 +58,7 @@ class PermitAccess(Access):
 
     def grants(self, city):
         """Checks if the IP address is permitted."""
-        return not self.rules or self.accessable(city)
+        return not self.rules or self.accessible(city)
 
 
 class ForbidAccess(Access):
@@ -67,7 +67,7 @@ class ForbidAccess(Access):
 
     def grants(self, city):
         """Checks if the IP address is forbidden."""
-        return not self.rules or not self.accessable(city)
+        return not self.rules or not self.accessible(city)
 
 
 def grants_access(request, ip_address):
