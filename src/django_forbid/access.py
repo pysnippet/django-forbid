@@ -89,8 +89,11 @@ def grants_access(request, ip_address):
         if ForbidAccess().grants(city):
             return PermitAccess().grants(city)
         return False
-    except AddressNotFoundError:
+    except (AddressNotFoundError, Exception):
         # This happens when the IP address is not
         # in  the  GeoIP2 database. Usually, this
         # happens when the IP address is a local.
-        return getattr(settings, "DEBUG", False)
+        return not any([
+            ForbidAccess().rules,
+            PermitAccess().rules,
+        ]) or getattr(settings, "DEBUG", False)
