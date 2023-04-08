@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 from django.http import HttpResponse
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.shortcuts import render
 
@@ -22,20 +23,15 @@ def detect(get_response, request):
     ]):
         return get_response(request)
 
-    # Ensures the request does not come
-    # from the `timezone.html` template.
-    if not request.POST.get("timezone"):
-        response = get_response(request)
-
-        # Usually, this happens when CSRF is invalid.
-        if response.status_code == 403:
+    response_attributes = ("content", "charset", "headers", "status", "reason")
+    if all(map(request.session.has_key, ("tz", *response_attributes))):
+        # Handles if the user's timezone differs from the
+        # one determined by GeoIP API. If so, VPN is used.
+        if request.POST.get("timezone", "N/A") != request.session.get("tz"):
             if hasattr(settings, "FORBIDDEN_URL"):
                 return redirect(settings.FORBIDDEN_URL)
-            return response
+            return HttpResponseForbidden()
 
-    response_attributes = ("content", "charset", "headers", "status", "reason")
-    if all(map(request.session.has_key, ("tz", *response_attributes))) and \
-            request.POST.get("timezone", "N/A") == request.session.get("tz"):
         # Restores the response from the session.
         response = HttpResponse(
             **{attr: request.session.get(attr) for attr in response_attributes if attr != "headers"},
