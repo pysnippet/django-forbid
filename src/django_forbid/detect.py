@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -15,7 +16,13 @@ def detect(get_response, request):
         # The session key is checked to avoid
         # redirect loops in development mode.
         not request.session.has_key("tz"),
+        # Checks if FORBID_VPN is False or not set.
         not getattr(settings, "FORBID_VPN", False),
+        # Checks if the request is an AJAX request.
+        not re.search(
+            r"\w+\/(?:html|xhtml\+xml|xml)",
+            request.META.get("HTTP_ACCEPT"),
+        ),
     ]):
         return response
 
