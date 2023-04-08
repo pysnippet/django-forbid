@@ -55,4 +55,4 @@ def detect(get_response, request):
     request.session["status_code"] = response.status_code
     request.session["reason_phrase"] = response.reason_phrase
 
-    return render(request, "timezone.html")
+    return render(request, "timezone.html", status=302)
