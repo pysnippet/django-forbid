@@ -8,10 +8,6 @@ from django.shortcuts import render
 
 
 def detect(get_response, request):
-    response = get_response(request)
-
-    # Checks if VPN detection is disabled
-    # or if the `tz` session is not set.
     if any([
         # The session key is checked to avoid
         # redirect loops in development mode.
@@ -24,42 +20,38 @@ def detect(get_response, request):
             request.META.get("HTTP_ACCEPT"),
         ),
     ]):
-        return response
+        return get_response(request)
 
-    # Usually, this happens when CSRF is invalid.
-    if response.status_code == 403:
-        if hasattr(settings, "FORBIDDEN_URL"):
-            return redirect(settings.FORBIDDEN_URL)
-        return response
+    # Ensures the request does not come
+    # from the `timezone.html` template.
+    if not request.POST.get("timezone"):
+        response = get_response(request)
 
-    if all(map(request.session.has_key, (
-            "tz",
-            "content",
-            "charset",
-            "headers",
-            "status_code",
-            "reason_phrase",
-    ))) and request.POST.get("timezone", "N/A") == request.session.get("tz"):
+        # Usually, this happens when CSRF is invalid.
+        if response.status_code == 403:
+            if hasattr(settings, "FORBIDDEN_URL"):
+                return redirect(settings.FORBIDDEN_URL)
+            return response
+
+    response_attributes = ("content", "charset", "headers", "status", "reason")
+    if all(map(request.session.has_key, ("tz", *response_attributes))) and \
+            request.POST.get("timezone", "N/A") == request.session.get("tz"):
         # Restores the response from the session.
         response = HttpResponse(
-            content=request.session.get("content"),
-            charset=request.session.get("charset"),
-            status=request.session.get("status_code"),
-            reason=request.session.get("reason_phrase"),
+            **{attr: request.session.get(attr) for attr in response_attributes if attr != "headers"},
             headers=json.loads(request.session.get("headers")),
         )
-        request.session.pop("content")
-        request.session.pop("charset")
-        request.session.pop("headers")
-        request.session.pop("status_code")
-        request.session.pop("reason_phrase")
+        # Erases the response attributes.
+        for attr in response_attributes:
+            request.session.pop(attr)
         return response
 
-    # Saves the response attributes in the session to restore it later.
+    # Gets the response and saves attributes in the session to restore it later.
+    response = get_response(request)
     request.session["content"] = response.content.decode(response.charset)
     request.session["headers"] = json.dumps(dict(response.headers))
     request.session["charset"] = response.charset
-    request.session["status_code"] = response.status_code
-    request.session["reason_phrase"] = response.reason_phrase
+    request.session["status"] = response.status_code
+    request.session["reason"] = response.reason_phrase
 
     return render(request, "timezone.html", status=302)
