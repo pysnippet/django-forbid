@@ -9,6 +9,12 @@ from django.shortcuts import render
 
 
 def detect_vpn(get_response, request):
+    response_attributes = ("content", "charset", "headers", "status", "reason")
+
+    def erase_response_attributes():
+        for attr in response_attributes:
+            request.session.pop(attr)
+
     if any([
         # The session key is checked to avoid
         # redirect loops in development mode.
@@ -23,11 +29,11 @@ def detect_vpn(get_response, request):
     ]):
         return get_response(request)
 
-    response_attributes = ("content", "charset", "headers", "status", "reason")
     if all(map(request.session.has_key, ("tz", *response_attributes))):
         # Handles if the user's timezone differs from the
         # one determined by GeoIP API. If so, VPN is used.
         if request.POST.get("timezone", "N/A") != request.session.get("tz"):
+            erase_response_attributes()
             if hasattr(settings, "FORBIDDEN_URL"):
                 return redirect(settings.FORBIDDEN_URL)
             return HttpResponseForbidden()
@@ -37,9 +43,7 @@ def detect_vpn(get_response, request):
             **{attr: request.session.get(attr) for attr in response_attributes if attr != "headers"},
             headers=json.loads(request.session.get("headers")),
         )
-        # Erases the response attributes.
-        for attr in response_attributes:
-            request.session.pop(attr)
+        erase_response_attributes()
         return response
 
     # Gets the response and saves attributes in the session to restore it later.
