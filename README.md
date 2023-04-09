@@ -71,6 +71,8 @@ The available ISO 3166 alpha-2 country codes are listed in [here](https://www.ib
 ISO continent codes are: `AF` - Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` -
 Oceania and `SA` - South America.
 
+### Check access on timeout
+
 Without additional configuration, the middleware will check the user's access on every request. This can slow down the
 site. To avoid this, you can use the `FORBID_TIMEOUT` variable to set the cache timeout in seconds. When the timeout
 expires, the middleware will check the user's access again.
@@ -79,6 +81,12 @@ expires, the middleware will check the user's access again.
 # Check the user's access every 10 minutes.
 FORBID_TIMEOUT = 60 * 10
 ```
+
+### Detect usage of a VPN
+
+If you want to detect the usage of a VPN, you can use the `FORBID_VPN` variable. When this variable is set to `True`,
+the middleware will check if the user's timezone matches the timezone the IP address belongs to. If the timezones do not
+match, the user will be considered in the usage of a VPN and forbidden to access the site.
 
 ## Contribute
 
