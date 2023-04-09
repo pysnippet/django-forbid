@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 
 
-def detect(get_response, request):
+def detect_vpn(get_response, request):
     if any([
         # The session key is checked to avoid
         # redirect loops in development mode.
