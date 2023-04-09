@@ -13,6 +13,12 @@ def test_access_without_configuration():
     assert grants_access(request, "doesnt-matter")
 
 
+@override_settings(FORBID_VPN=True)
+def test_access_forbid_vpn():
+    """If VPN detection is enabled, access is granted everywhere."""
+    assert grants_access(request, "doesnt-matter")
+
+
 @override_settings(WHITELIST_COUNTRIES=["US"], DEBUG=True)
 def test_access_from_localhost_development_mode():
     """In development mode, access is granted from localhost."""
