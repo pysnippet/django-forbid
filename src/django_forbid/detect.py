@@ -9,7 +9,7 @@ from django.shortcuts import render
 
 
 def detect_vpn(get_response, request):
-    response_attributes = ("content", "charset", "headers", "status", "reason")
+    response_attributes = ("content", "charset", "status", "reason")
 
     def erase_response_attributes():
         for attr in response_attributes:
@@ -39,17 +39,18 @@ def detect_vpn(get_response, request):
             return HttpResponseForbidden()
 
         # Restores the response from the session.
-        response = HttpResponse(
-            **{attr: request.session.get(attr) for attr in response_attributes if attr != "headers"},
-            headers=json.loads(request.session.get("headers")),
-        )
+        response = HttpResponse(**{attr: request.session.get(attr) for attr in response_attributes})
+        if hasattr(response, "headers"):
+            response.headers = json.loads(request.session.get("headers"))
         erase_response_attributes()
         return response
 
     # Gets the response and saves attributes in the session to restore it later.
     response = get_response(request)
+    if hasattr(response, "headers"):
+        # In older versions of Django, HttpResponse does not have headers attribute.
+        request.session["headers"] = json.dumps(dict(response.headers))
     request.session["content"] = response.content.decode(response.charset)
-    request.session["headers"] = json.dumps(dict(response.headers))
     request.session["charset"] = response.charset
     request.session["status"] = response.status_code
     request.session["reason"] = response.reason_phrase
