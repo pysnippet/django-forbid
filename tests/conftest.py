@@ -13,6 +13,7 @@ def pytest_configure():
         MIDDLEWARE=[
             "django_forbid.middleware.ForbidMiddleware"
         ],
+        TEMPLATES=[{"BACKEND": "django.template.backends.django.DjangoTemplates", "APP_DIRS": True}],
         # The `pathlib.Path` support was added after Django 3.0.
         GEOIP_PATH=(Path(__file__).parent / "geoip").as_posix(),
     )
