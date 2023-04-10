@@ -1,11 +1,12 @@
 import json
 import re
 
-from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.shortcuts import render
+
+from .config import Settings
 
 
 def detect_vpn(get_response, request):
@@ -19,8 +20,8 @@ def detect_vpn(get_response, request):
         # The session key is checked to avoid
         # redirect loops in development mode.
         not request.session.has_key("tz"),
-        # Checks if FORBID_VPN is False or not set.
-        not getattr(settings, "FORBID_VPN", False),
+        # Checks if VPN is False or not set.
+        not Settings.get("OPTIONS.VPN", False),
         # Checks if the request is an AJAX request.
         not re.search(
             r"\w+\/(?:html|xhtml\+xml|xml)",
@@ -34,8 +35,9 @@ def detect_vpn(get_response, request):
         # one determined by GeoIP API. If so, VPN is used.
         if request.POST.get("timezone", "N/A") != request.session.get("tz"):
             erase_response_attributes()
-            if hasattr(settings, "FORBIDDEN_URL"):
-                return redirect(settings.FORBIDDEN_URL)
+            # Redirects to the FORBIDDEN_VPN URL if set.
+            if Settings.has("OPTIONS.URL.FORBIDDEN_VPN"):
+                return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_VPN"))
             return HttpResponseForbidden()
 
         # Restores the response from the session.
@@ -48,7 +50,7 @@ def detect_vpn(get_response, request):
     # Gets the response and saves attributes in the session to restore it later.
     response = get_response(request)
     if hasattr(response, "headers"):
-        # In older versions of Django, HttpResponse does not have headers attribute.
+        # In older versions of Django, HttpResponse does not have headers.
         request.session["headers"] = json.dumps(dict(response.headers))
     request.session["content"] = response.content.decode(response.charset)
     request.session["charset"] = response.charset

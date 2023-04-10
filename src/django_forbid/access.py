@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
 
+from .config import Settings
+
 
 class Rule:
     # Key in the geoip2 city object.
@@ -37,11 +39,13 @@ class Access:
     def __init__(self):
         self.rules = []
 
-        for country in getattr(settings, self.countries, []):
-            self.rules.append(CountryRule(country.upper()))
+        if Settings.has(self.countries):
+            for country in Settings.get(self.countries):
+                self.rules.append(CountryRule(country.upper()))
 
-        for territory in getattr(settings, self.territories, []):
-            self.rules.append(ContinentRule(territory.upper()))
+        if Settings.has(self.territories):
+            for territory in Settings.get(self.territories):
+                self.rules.append(ContinentRule(territory.upper()))
 
     def accessible(self, city):
         """Checks if the IP address is in the white zone."""
@@ -94,6 +98,6 @@ def grants_access(request, ip_address):
         # in  the  GeoIP2 database. Usually, this
         # happens when the IP address is a local.
         return not any([
-            ForbidAccess().rules,
-            PermitAccess().rules,
+            Settings.has(Access.countries),
+            Settings.has(Access.territories),
         ]) or getattr(settings, "DEBUG", False)
