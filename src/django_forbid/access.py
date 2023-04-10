@@ -28,10 +28,8 @@ class ContinentRule(Rule):
 
 
 class Access:
-    # Variables in the settings module.
-    # Subclasses should override this.
-    countries = None
-    territories = None
+    countries = "COUNTRIES"
+    territories = "TERRITORIES"
 
     # Hold the instance of GeoIP2.
     geoip = GeoIP2()
@@ -57,21 +55,26 @@ class Access:
 
 
 class PermitAccess(Access):
-    countries = "WHITELIST_COUNTRIES"
-    territories = "WHITELIST_TERRITORIES"
-
     def grants(self, city):
         """Checks if the IP address is permitted."""
         return not self.rules or self.accessible(city)
 
 
 class ForbidAccess(Access):
-    countries = "FORBIDDEN_COUNTRIES"
-    territories = "FORBIDDEN_TERRITORIES"
-
     def grants(self, city):
         """Checks if the IP address is forbidden."""
         return not self.rules or not self.accessible(city)
+
+
+class Factory:
+    """Creates an instance of the Access class."""
+
+    FORBID = ForbidAccess
+    PERMIT = PermitAccess
+
+    @classmethod
+    def create_access(cls, action):
+        return getattr(cls, action)()
 
 
 def grants_access(request, ip_address):
@@ -86,13 +89,10 @@ def grants_access(request, ip_address):
         timezone = city.get("time_zone")
         request.session["tz"] = timezone
 
-        # First, checks if the IP address is not
-        # forbidden. If it is, False is returned
-        # otherwise, checks if the IP address is
-        # permitted.
-        if ForbidAccess().grants(city):
-            return PermitAccess().grants(city)
-        return False
+        # Creates an instance of the Access class
+        # and checks if the IP address is granted.
+        action = Settings.get("OPTIONS.ACTION", "FORBID")
+        return Factory.create_access(action).grants(city)
     except (AddressNotFoundError, Exception):
         # This happens when the IP address is not
         # in  the  GeoIP2 database. Usually, this
