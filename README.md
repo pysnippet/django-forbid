@@ -42,51 +42,40 @@ configuration.
 ## Usage
 
 After connecting the Django Forbid to your project, you can define the set of desired zones to be forbidden or allowed.
-And there are four setting variables for describing any of your specific needs:
+All you need is to set the `DJANGO_FORBID` variable in your project's settings. It should be a dictionary with the
+following keys:
 
-- `WHITELIST_COUNTRIES` and `WHITELIST_TERRITORIES` - Correspondingly, the list of countries and territories that are
-  allowed to access the site.
-- `FORBIDDEN_COUNTRIES` and `FORBIDDEN_TERRITORIES` - Correspondingly, the list of countries and territories that are
-  forbidden to access the site.
-
-Forbidden countries and territories have a higher priority than allowed ones. If a country or territory is in both
-lists, then the user will be forbidden. And if the user is not allowed to access the resource, it will be redirected to
-the `FORBIDDEN_URL` page if the variable is set in your Django project's settings.
-
-```python
-# Only US, GB, and EU countries are allowed to access the site.
-WHITELIST_COUNTRIES = ['US', 'GB']
-WHITELIST_TERRITORIES = ['EU']
-```
-
-Needs can be different, so you can use any combination of these variables to describe your special needs.
+- `COUNTRIES` - list of countries to permit or forbid access to
+- `TERRITORIES` - list of territories to permit or forbid access to
+- `OPTIONS` - a dictionary for additional settings
+  - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
+  - `PERIOD` - time in seconds to check for access again, 0 means on each request
+  - `VPN` - use VPN detection and forbid access to VPN users
+  - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
+      - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
+      - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
 
 ```python
-# Forbid access for African countries and Russia, Belarus, and North Korea.
-FORBIDDEN_COUNTRIES = ['RU', 'BY', 'KP']
-FORBIDDEN_TERRITORIES = ['AF']
+DJANGO_FORBID = {
+    'COUNTRIES': ['US', 'GB'],
+    'TERRITORIES': ['EU'],
+    'OPTIONS': {
+        'ACTION': 'PERMIT',
+        'PERIOD': 300,
+        'VPN': True,
+        'URL': {
+            'FORBIDDEN_LOC': 'forbidden_country',
+            'FORBIDDEN_VPN': 'forbidden_network',
+        },
+    },
+}
 ```
 
 The available ISO 3166 alpha-2 country codes are listed in [here](https://www.iban.com/country-codes). And the available
 ISO continent codes are: `AF` - Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` -
 Oceania and `SA` - South America.
 
-### Check access on timeout
-
-Without additional configuration, the middleware will check the user's access on every request. This can slow down the
-site. To avoid this, you can use the `FORBID_TIMEOUT` variable to set the cache timeout in seconds. When the timeout
-expires, the middleware will check the user's access again.
-
-```python
-# Check the user's access every 10 minutes.
-FORBID_TIMEOUT = 60 * 10
-```
-
-### Detect usage of a VPN
-
-If you want to detect the usage of a VPN, you can use the `FORBID_VPN` variable. When this variable is set to `True`,
-the middleware will check if the user's timezone matches the timezone the IP address belongs to. If the timezones do not
-match, the user will be considered in the usage of a VPN and forbidden to access the site.
+_None of the settings are required. If you don't specify any settings, the middleware will not do anything._
 
 ## Contribute
 
