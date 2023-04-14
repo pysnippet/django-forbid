@@ -50,7 +50,7 @@ class Detector:
         return detect_vpn(self.get_response, request)
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_localhost(get_response):
     """It should give access to the user when using localhost"""
     detector = Detector(get_response)
@@ -58,7 +58,7 @@ def test_detect_when_using_localhost(get_response):
     assert response.status_code == 200
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_localhost_ajax(get_response):
     """It should give access to the user when request is done by AJAX"""
     detector = Detector(get_response, True)
@@ -66,7 +66,7 @@ def test_detect_when_using_localhost_ajax(get_response):
     assert response.status_code == 200
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_nonlocal_ip(get_response):
     """User should pass through two requests to access the resource"""
     detector = Detector(get_response)
@@ -76,7 +76,7 @@ def test_detect_when_using_nonlocal_ip(get_response):
     assert response.status_code == 200
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_vpn(get_response):
     """User should be forbidden to access the resource when using VPN"""
     detector = Detector(get_response)
@@ -86,7 +86,7 @@ def test_detect_when_using_vpn(get_response):
     assert response.status_code == 403
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_turns_off_vpn_after_using(get_response):
     """User should get access to the resource when VPN is turned off"""
     detector = Detector(get_response)
@@ -103,7 +103,7 @@ def test_detect_when_turns_off_vpn_after_using(get_response):
     assert response.status_code == 200
 
 
-@override_settings(FORBID_VPN=True)
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_nonlocal_ip_ajax(get_response):
     """It should give access to the user when request is done by AJAX"""
     detector = Detector(get_response, True)
