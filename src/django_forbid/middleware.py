@@ -7,6 +7,8 @@ from django.utils.timezone import utc
 from .access import grants_access
 from .config import Settings
 from .detect import detect_vpn
+from .device import detect_device
+from .device import device_forbidden
 
 
 class ForbidMiddleware:
@@ -18,6 +20,16 @@ class ForbidMiddleware:
     def __call__(self, request):
         address = request.META.get("REMOTE_ADDR")
         address = request.META.get("HTTP_X_FORWARDED_FOR", address)
+
+        # Detects the user's device and saves it in the session.
+        if not request.session.get("DEVICE"):
+            http_ua = request.META.get("HTTP_USER_AGENT")
+            request.session["DEVICE"] = detect_device(http_ua)
+
+        if device_forbidden(request.session.get("DEVICE")):
+            if Settings.has("OPTIONS.URL.FORBIDDEN_KIT"):
+                return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_KIT"))
+            return HttpResponseForbidden()
 
         # Checks if the PERIOD attr is set and the user has been granted access.
         if Settings.has("OPTIONS.PERIOD") and request.session.has_key("ACCESS"):
