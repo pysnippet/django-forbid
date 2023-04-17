@@ -46,18 +46,39 @@ After connecting the Django Forbid to your project, you can define the set of de
 All you need is to set the `DJANGO_FORBID` variable in your project's settings. It should be a dictionary with the
 following keys:
 
+- `DEVICES` - list of devices to permit or forbid access to
 - `COUNTRIES` - list of countries to permit or forbid access to
 - `TERRITORIES` - list of territories to permit or forbid access to
 - `OPTIONS` - a dictionary for additional settings
-  - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
-  - `PERIOD` - time in seconds to check for access again, 0 means on each request
-  - `VPN` - use VPN detection and forbid access to VPN users
-  - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
-      - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
-      - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
+    - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
+    - `PERIOD` - time in seconds to check for access again, 0 means on each request
+    - `VPN` - use VPN detection and forbid access to VPN users
+    - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
+        - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
+        - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
+        - `FORBIDDEN_KIT` - the URL to redirect to when the user is using a forbidden device
+
+Unlike the `COUNTRIES` and `TERRITORIES`, where the middleware decides whether to permit or forbid access based on the
+given `ACTION` value, the `DEVICES` list accepts device types where the names starting with `!` are forbidden. This is
+done to make it possible to make them all mix together.
+
+```python
+# Forbid access to all devices that have a small screen.
+'DEVICES': ['!car', '!player', '!peripheral', '!camera']
+
+# Allow access to all devices having regular or large screens.
+'DEVICES': ['desktop', 'smartphone', 'console', 'tablet', 'tv']
+```
+
+The available device types are: `smartphone`, `peripheral` - refers to all hardware components that are attached to a
+computer, `wearable` - common types of wearable technology include smartwatches and smartglasses, `phablet` - a
+smartphone having a larger screen, `console` - PlayStation, Xbox, etc., `display`, `speaker` - Google Assistant, Siri,
+Alexa, etc., `desktop`, `tablet`, `camera`, `player` - iPod, Sony Walkman, Creative Zen, etc., `phone`, `car` - refers
+to a car browser and `tv` - refers to TVs having internet access.
 
 ```python
 DJANGO_FORBID = {
+    'DEVICES': ['desktop', 'smartphone', 'console', 'tablet', 'tv'],
     'COUNTRIES': ['US', 'GB'],
     'TERRITORIES': ['EU'],
     'OPTIONS': {
@@ -65,16 +86,17 @@ DJANGO_FORBID = {
         'PERIOD': 300,
         'VPN': True,
         'URL': {
-            'FORBIDDEN_LOC': 'forbidden_country',
+            'FORBIDDEN_LOC': 'forbidden_location',
             'FORBIDDEN_VPN': 'forbidden_network',
+            'FORBIDDEN_KIT': 'forbidden_device',
         },
     },
 }
 ```
 
-The available ISO 3166 alpha-2 country codes are listed in [here](https://www.iban.com/country-codes). And the available
-ISO continent codes are: `AF` - Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` -
-Oceania and `SA` - South America.
+The available country codes in the required ISO 3166 alpha-2 format are
+listed [here](https://www.iban.com/country-codes). And the available continent codes (territories) are: `AF` -
+Africa, `AN` - Antarctica, `AS` - Asia, `EU` - Europe, `NA` - North America, `OC` - Oceania and `SA` - South America.
 
 _None of the settings are required. If you don't specify any settings, the middleware will not do anything._
 
