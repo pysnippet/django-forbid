@@ -1,6 +1,7 @@
 # Django Forbid <img src="https://github.com/pysnippet.png" align="right" height="64" />
 
-Django app for forbidding access to some countries.
+Secure your Django app by controlling the access - grant or deny user access based on device and location, including VPN
+detection.
 
 [![PyPI](https://img.shields.io/pypi/v/django-forbid.svg)](https://pypi.org/project/django-forbid/)
 [![Python](https://img.shields.io/pypi/pyversions/django-forbid.svg?logoColor=white)](https://pypi.org/project/django-forbid/)
