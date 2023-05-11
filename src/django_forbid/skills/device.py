@@ -2,7 +2,7 @@ import re
 
 from device_detector import DeviceDetector
 
-from .config import Settings
+from ..config import Settings
 
 
 def detect_device(http_ua):

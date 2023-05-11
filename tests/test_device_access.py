@@ -1,7 +1,7 @@
 from django.test import override_settings
 
-from django_forbid.device import detect_device
-from django_forbid.device import device_forbidden
+from django_forbid.skills.device import detect_device
+from django_forbid.skills.device import device_forbidden
 
 unknown_ua = "curl/7.47.0"
 peripheral_ua = "Mozilla/5.0 (Linux; Android 7.0; SHTRIH-SMARTPOS-F2 Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/51.0.2704.91 Mobile Safari/537.36"

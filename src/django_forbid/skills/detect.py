@@ -6,7 +6,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.shortcuts import render
 
-from .config import Settings
+from ..config import Settings
 
 
 def detect_vpn(get_response, request):

@@ -4,11 +4,11 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.utils.timezone import utc
 
-from .access import grants_access
 from .config import Settings
-from .detect import detect_vpn
-from .device import detect_device
-from .device import device_forbidden
+from .skills.access import grants_access
+from .skills.detect import detect_vpn
+from .skills.device import detect_device
+from .skills.device import device_forbidden
 
 
 class ForbidMiddleware:

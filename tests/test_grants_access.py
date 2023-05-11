@@ -1,7 +1,7 @@
 from django.test import RequestFactory
 from django.test import override_settings
 
-from django_forbid.access import grants_access
+from django_forbid.skills.access import grants_access
 
 factory = RequestFactory()
 request = factory.get("/")

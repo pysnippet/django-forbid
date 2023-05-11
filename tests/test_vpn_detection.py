@@ -1,8 +1,8 @@
 from django.test import RequestFactory
 from django.test import override_settings
 
-from django_forbid.access import grants_access
-from django_forbid.detect import detect_vpn
+from django_forbid.skills.access import grants_access
+from django_forbid.skills.detect import detect_vpn
 
 LOCALHOST = "localhost"
 IP_LONDON = "212.102.63.59"

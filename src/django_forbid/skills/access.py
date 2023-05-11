@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from geoip2.errors import AddressNotFoundError
 
-from .config import Settings
+from ..config import Settings
 
 
 class Rule:
