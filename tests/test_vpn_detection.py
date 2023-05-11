@@ -41,7 +41,8 @@ class Detector:
     def request_resource(self, ip_address=""):
         """Sends a request to the server to access a resource"""
         request = self.request.get()
-        grants_access(request, ip_address)
+        request.META["HTTP_X_FORWARDED_FOR"] = ip_address
+        grants_access(request)
         return detect_vpn(self.get_response, request)
 
     def request_access(self):

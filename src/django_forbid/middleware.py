@@ -18,9 +18,6 @@ class ForbidMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        address = request.META.get("REMOTE_ADDR")
-        address = request.META.get("HTTP_X_FORWARDED_FOR", address)
-
         # Detects the user's device and saves it in the session.
         if not request.session.get("DEVICE"):
             http_ua = request.META.get("HTTP_USER_AGENT")
@@ -40,7 +37,7 @@ class ForbidMiddleware:
                 return detect_vpn(self.get_response, request)
 
         # Checks if access is granted when timeout is reached.
-        if grants_access(request, address.split(",")[0].strip()):
+        if grants_access(request):
             acss = datetime.utcnow().replace(tzinfo=utc)
             request.session["ACCESS"] = acss.timestamp()
             return detect_vpn(self.get_response, request)
