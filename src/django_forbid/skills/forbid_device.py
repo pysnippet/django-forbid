@@ -5,21 +5,6 @@ from device_detector import DeviceDetector
 from ..config import Settings
 
 
-def detect_device(http_ua):
-    device_aliases = {
-        "portable media player": "player",
-        "smart display": "display",
-        "smart speaker": "speaker",
-        "feature phone": "phone",
-        "car browser": "car",
-    }
-
-    device_detector = DeviceDetector(http_ua)
-    device_detector = device_detector.parse()
-    device = device_detector.device_type()
-    return device_aliases.get(device, device)
-
-
 def normalize(device_type):
     """Removes the "!" prefix from the device type."""
     return device_type[1:]
@@ -35,7 +20,25 @@ def permitted(device_type):
     return not forbidden(device_type)
 
 
-def device_forbidden(device_type):
+def forbid_device(request):
+    device_aliases = {
+        "portable media player": "player",
+        "smart display": "display",
+        "smart speaker": "speaker",
+        "feature phone": "phone",
+        "car browser": "car",
+    }
+
+    device_type = request.session.get("DEVICE")
+
+    if not request.session.get("DEVICE"):
+        http_ua = request.META.get("HTTP_USER_AGENT")
+        device_detector = DeviceDetector(http_ua)
+        device_detector = device_detector.parse()
+        device = device_detector.device_type()
+        device_type = device_aliases.get(device, device)
+        request.session["DEVICE"] = device_type
+
     devices = Settings.get("DEVICES", [])
 
     # Permit all devices if the

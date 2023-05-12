@@ -5,10 +5,9 @@ from django.shortcuts import redirect
 from django.utils.timezone import utc
 
 from .config import Settings
-from .skills.access import grants_access
-from .skills.detect import detect_vpn
-from .skills.device import detect_device
-from .skills.device import device_forbidden
+from .skills.forbid_location import forbid_location
+from .skills.forbid_network import forbid_network
+from .skills.forbid_device import forbid_device
 
 
 class ForbidMiddleware:
@@ -19,11 +18,7 @@ class ForbidMiddleware:
 
     def __call__(self, request):
         # Detects the user's device and saves it in the session.
-        if not request.session.get("DEVICE"):
-            http_ua = request.META.get("HTTP_USER_AGENT")
-            request.session["DEVICE"] = detect_device(http_ua)
-
-        if device_forbidden(request.session.get("DEVICE")):
+        if forbid_device(request):
             if Settings.has("OPTIONS.URL.FORBIDDEN_KIT"):
                 return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_KIT"))
             return HttpResponseForbidden()
@@ -34,13 +29,13 @@ class ForbidMiddleware:
 
             # Checks if access is not timed out yet.
             if acss - request.session.get("ACCESS") < Settings.get("OPTIONS.PERIOD"):
-                return detect_vpn(self.get_response, request)
+                return forbid_network(self.get_response, request)
 
         # Checks if access is granted when timeout is reached.
-        if grants_access(request):
+        if forbid_location(request):
             acss = datetime.utcnow().replace(tzinfo=utc)
             request.session["ACCESS"] = acss.timestamp()
-            return detect_vpn(self.get_response, request)
+            return forbid_network(self.get_response, request)
 
         # Redirects to the FORBIDDEN_LOC URL if set.
         if Settings.has("OPTIONS.URL.FORBIDDEN_LOC"):

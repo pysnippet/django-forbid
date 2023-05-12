@@ -9,7 +9,7 @@ from django.shortcuts import render
 from ..config import Settings
 
 
-def detect_vpn(get_response, request):
+def forbid_network(get_response, request):
     response_attributes = ("content", "charset", "status", "reason")
 
     def erase_response_attributes():

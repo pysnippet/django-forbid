@@ -77,7 +77,7 @@ class Factory:
         return getattr(cls, action)()
 
 
-def grants_access(request):
+def forbid_location(request):
     """Checks if the IP address is in the white zone."""
     address = request.META.get("REMOTE_ADDR")
     address = request.META.get("HTTP_X_FORWARDED_FOR", address)
