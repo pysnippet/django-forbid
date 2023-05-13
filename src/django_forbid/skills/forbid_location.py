@@ -1,5 +1,10 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
+from django.http import HttpResponseForbidden
+from django.shortcuts import redirect
+from django.utils.timezone import utc
 from geoip2.errors import AddressNotFoundError
 
 from ..config import Settings
@@ -77,31 +82,47 @@ class Factory:
         return getattr(cls, action)()
 
 
-def forbid_location(request):
-    """Checks if the IP address is in the white zone."""
-    address = request.META.get("REMOTE_ADDR")
-    address = request.META.get("HTTP_X_FORWARDED_FOR", address)
-    ip_address = address.split(",")[0].strip()
+class ForbidLocationMiddleware:
+    """Checks if the user location is forbidden."""
 
-    try:
-        city = Access.geoip.city(ip_address)
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-        # Saves the timezone in the session for
-        # comparing it with the timezone in the
-        # POST request sent from user's browser
-        # to detect if the user is using VPN.
-        timezone = city.get("time_zone")
-        request.session["tz"] = timezone
+    def __call__(self, request):
+        address = request.META.get("REMOTE_ADDR")
+        address = request.META.get("HTTP_X_FORWARDED_FOR", address)
+        ip_address = address.split(",")[0].strip()
 
-        # Creates an instance of the Access class
-        # and checks if the IP address is granted.
-        action = Settings.get("OPTIONS.ACTION", "FORBID")
-        return Factory.create_access(action).grants(city)
-    except (AddressNotFoundError, Exception):
-        # This happens when the IP address is not
-        # in  the  GeoIP2 database. Usually, this
-        # happens when the IP address is a local.
-        return not any([
-            Settings.has(Access.countries),
-            Settings.has(Access.territories),
-        ]) or getattr(settings, "DEBUG", False)
+        try:
+            city = Access.geoip.city(ip_address)
+
+            # Saves the timezone in the session for
+            # comparing it with the timezone in the
+            # POST request sent from user's browser
+            # to detect if the user is using VPN.
+            timezone = city.get("time_zone")
+            request.session["tz"] = timezone
+
+            # Creates an instance of the Access class
+            # and checks if the IP address is granted.
+            action = Settings.get("OPTIONS.ACTION", "FORBID")
+            granted = Factory.create_access(action).grants(city)
+        except (AddressNotFoundError, Exception):
+            # This happens when the IP address is not
+            # in  the  GeoIP2 database. Usually, this
+            # happens when the IP address is a local.
+            granted = not any([
+                Settings.has(Access.countries),
+                Settings.has(Access.territories),
+            ]) or getattr(settings, "DEBUG", False)
+
+        if granted:
+            acss = datetime.utcnow().replace(tzinfo=utc)
+            request.session["ACCESS"] = acss.timestamp()
+            return self.get_response(request)
+
+        # Redirects to the FORBIDDEN_LOC URL if set.
+        if Settings.has("OPTIONS.URL.FORBIDDEN_LOC"):
+            return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_LOC"))
+
+        return HttpResponseForbidden()

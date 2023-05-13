@@ -1,7 +1,7 @@
 from django.test import RequestFactory
 from django.test import override_settings
 
-from django_forbid.skills.forbid_device import forbid_device
+from django_forbid.skills.forbid_device import ForbidDeviceMiddleware
 
 unknown_ua = "curl/7.47.0"
 peripheral_ua = "Mozilla/5.0 (Linux; Android 7.0; SHTRIH-SMARTPOS-F2 Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/51.0.2704.91 Mobile Safari/537.36"
@@ -24,62 +24,53 @@ request = factory.get("/")
 request.session = {}
 
 
+def get_status_code(get_response, user_agent):
+    request.session["DEVICE"] = None
+    request.META["HTTP_USER_AGENT"] = user_agent
+    response = ForbidDeviceMiddleware(get_response)(request)
+    return response.status_code
+
+
 @override_settings(DJANGO_FORBID={"DEVICES": []})
-def test_access_with_empty_list_of_devices():
+def test_access_with_empty_list_of_devices(get_response):
     """Should allow access to all devices if the list is empty, even if the user agent is unknown."""
     for device_ua in (peripheral_ua, smartphone_ua, wearable_ua, phablet_ua,
                       desktop_ua, console_ua, display_ua, speaker_ua, camera_ua,
                       tablet_ua, player_ua, phone_ua, car_ua, tv_ua, unknown_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert not forbid_device(request)
-        del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) == 200
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["desktop", "smartphone", "console", "tablet", "tv"]})
-def test_access_desktops_smartphones_consoles_tablets_and_tvs():
+def test_access_desktops_smartphones_consoles_tablets_and_tvs(get_response):
     """Should allow access to desktops, smartphones, consoles, tablets and TVs."""
     for device_ua in (peripheral_ua, wearable_ua, phablet_ua, display_ua,
                       speaker_ua, camera_ua, player_ua, phone_ua, car_ua, unknown_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert forbid_device(request)
-        del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) != 200
     for device_ua in (desktop_ua, smartphone_ua, console_ua, tablet_ua, tv_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert not forbid_device(request)
-        del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) == 200
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["!car", "!speaker", "!wearable"]})
-def test_forbid_access_to_cars_speakers_and_wearables():
+def test_forbid_access_to_cars_speakers_and_wearables(get_response):
     """Should forbid access to cars, speakers and wearables."""
     for device_ua in (peripheral_ua, smartphone_ua, phablet_ua, desktop_ua, console_ua,
                       display_ua, camera_ua, tablet_ua, player_ua, phone_ua, tv_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert not forbid_device(request)
-        del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) == 200
     for device_ua in (car_ua, speaker_ua, wearable_ua, unknown_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert forbid_device(request)
-        del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) != 200
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["!phablet", "tablet", "phablet"]})
-def test_forbid_access_if_same_device_is_listed_as_permitted_and_forbidden():
+def test_forbid_access_if_same_device_is_listed_as_permitted_and_forbidden(get_response):
     """Should forbid access if the same device is listed as permitted and forbidden."""
     for device_ua in (peripheral_ua, smartphone_ua, phablet_ua, desktop_ua,
                       console_ua, display_ua, camera_ua, player_ua, phone_ua,
                       tv_ua, car_ua, speaker_ua, wearable_ua, unknown_ua):
-        request.META["HTTP_USER_AGENT"] = device_ua
-        assert forbid_device(request)
-        del request.session["DEVICE"]
-    request.META["HTTP_USER_AGENT"] = tablet_ua
-    assert not forbid_device(request)
-    del request.session["DEVICE"]
+        assert get_status_code(get_response, device_ua) != 200
+    assert get_status_code(get_response, tablet_ua) == 200
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["smartphone", "phablet", "tablet"]})
-def test_forbid_access_unknown_devices_if_devices_are_set():
+def test_forbid_access_unknown_devices_if_devices_are_set(get_response):
     """Should forbid access to unknown devices if the list of devices is not empty."""
-    request.META["HTTP_USER_AGENT"] = unknown_ua
-    assert forbid_device(request)
-    del request.session["DEVICE"]
+    assert get_status_code(get_response, unknown_ua) != 200

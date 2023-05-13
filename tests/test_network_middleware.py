@@ -1,8 +1,8 @@
 from django.test import RequestFactory
 from django.test import override_settings
 
-from django_forbid.skills.forbid_location import forbid_location
-from django_forbid.skills.forbid_network import forbid_network
+from django_forbid.skills.forbid_location import ForbidLocationMiddleware
+from django_forbid.skills.forbid_network import ForbidNetworkMiddleware
 
 LOCALHOST = "localhost"
 IP_LONDON = "212.102.63.59"
@@ -42,13 +42,13 @@ class Detector:
         """Sends a request to the server to access a resource"""
         request = self.request.get()
         request.META["HTTP_X_FORWARDED_FOR"] = ip_address
-        forbid_location(request)
-        return forbid_network(self.get_response, request)
+        ForbidLocationMiddleware(self.get_response)(request)
+        return ForbidNetworkMiddleware(self.get_response)(request)
 
     def request_access(self):
         """Simulates the request sent by the user browser to the server"""
         request = self.request.post({"timezone": "Europe/London"})
-        return forbid_network(self.get_response, request)
+        return ForbidNetworkMiddleware(self.get_response)(request)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
