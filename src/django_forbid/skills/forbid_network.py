@@ -1,10 +1,12 @@
 import json
 import re
+from datetime import datetime
 
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.shortcuts import render
+from django.utils.timezone import utc
 
 from ..config import Settings
 
@@ -35,6 +37,13 @@ class ForbidNetworkMiddleware:
             ),
         ]):
             return self.get_response(request)
+
+        if Settings.has("OPTIONS.PERIOD") and request.session.has_key("ACCESS"):
+            acss = datetime.utcnow().replace(tzinfo=utc).timestamp()
+
+            # Checks if access is not timed out yet.
+            if acss - request.session.get("ACCESS") > Settings.get("OPTIONS.PERIOD"):
+                return self.get_response(request)
 
         if all(map(request.session.has_key, ("tz", *response_attributes))):
             # Handles if the user's timezone differs from the
