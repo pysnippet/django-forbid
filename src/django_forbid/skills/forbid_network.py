@@ -25,9 +25,6 @@ class ForbidNetworkMiddleware:
                 request.session.pop(attr)
 
         if any([
-            # The session key is checked to avoid
-            # redirect loops in development mode.
-            not request.session.has_key("tz"),
             # Checks if VPN is False or not set.
             not Settings.get("OPTIONS.VPN", False),
             # Checks if the request is an AJAX request.
@@ -38,17 +35,17 @@ class ForbidNetworkMiddleware:
         ]):
             return self.get_response(request)
 
-        if Settings.has("OPTIONS.PERIOD") and request.session.has_key("ACCESS"):
-            acss = datetime.utcnow().replace(tzinfo=utc).timestamp()
+        access = datetime.utcnow().replace(tzinfo=utc).timestamp()
 
-            # Checks if access is not timed out yet.
-            if acss - request.session.get("ACCESS") > Settings.get("OPTIONS.PERIOD"):
-                return self.get_response(request)
+        # Checks if access is not timed out yet.
+        if Settings.has("OPTIONS.PERIOD") and request.session.has_key("ACCESS") and \
+                access - request.session.get("ACCESS") < Settings.get("OPTIONS.PERIOD"):
+            return self.get_response(request)
 
         if all(map(request.session.has_key, ("tz", *response_attributes))):
             # Handles if the user's timezone differs from the
             # one determined by GeoIP API. If so, VPN is used.
-            if request.POST.get("timezone", "N/A") != request.session.get("tz"):
+            if request.session.get("tz") != "N/A" and request.POST.get("timezone", "N/A") != request.session.get("tz"):
                 erase_response_attributes()
                 # Redirects to the FORBIDDEN_VPN URL if set.
                 if Settings.has("OPTIONS.URL.FORBIDDEN_VPN"):
@@ -59,6 +56,7 @@ class ForbidNetworkMiddleware:
             response = HttpResponse(**{attr: request.session.get(attr) for attr in response_attributes})
             if hasattr(response, "headers"):
                 response.headers = json.loads(request.session.get("headers"))
+            request.session["ACCESS"] = access
             erase_response_attributes()
             return response
 

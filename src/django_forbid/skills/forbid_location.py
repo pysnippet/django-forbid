@@ -1,10 +1,7 @@
-from datetime import datetime
-
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
-from django.utils.timezone import utc
 from geoip2.errors import AddressNotFoundError
 
 from ..config import Settings
@@ -89,19 +86,13 @@ class ForbidLocationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        city = dict()
         address = request.META.get("REMOTE_ADDR")
         address = request.META.get("HTTP_X_FORWARDED_FOR", address)
         ip_address = address.split(",")[0].strip()
 
         try:
             city = Access.geoip.city(ip_address)
-
-            # Saves the timezone in the session for
-            # comparing it with the timezone in the
-            # POST request sent from user's browser
-            # to detect if the user is using VPN.
-            timezone = city.get("time_zone")
-            request.session["tz"] = timezone
 
             # Creates an instance of the Access class
             # and checks if the IP address is granted.
@@ -115,10 +106,15 @@ class ForbidLocationMiddleware:
                 Settings.has(Access.countries),
                 Settings.has(Access.territories),
             ]) or getattr(settings, "DEBUG", False)
+        finally:
+            # Saves the timezone in the session for
+            # comparing it with the timezone in the
+            # POST request sent from user's browser
+            # to detect if the user is using VPN.
+            timezone = city.get("time_zone", "N/A")
+            request.session["tz"] = timezone
 
         if granted:
-            acss = datetime.utcnow().replace(tzinfo=utc)
-            request.session["ACCESS"] = acss.timestamp()
             return self.get_response(request)
 
         # Redirects to the FORBIDDEN_LOC URL if set.

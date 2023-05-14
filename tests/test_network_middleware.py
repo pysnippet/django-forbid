@@ -42,8 +42,8 @@ class Detector:
         """Sends a request to the server to access a resource"""
         request = self.request.get()
         request.META["HTTP_X_FORWARDED_FOR"] = ip_address
-        ForbidLocationMiddleware(self.get_response)(request)
-        return ForbidNetworkMiddleware(self.get_response)(request)
+        get_response = ForbidLocationMiddleware(self.get_response)
+        return ForbidNetworkMiddleware(get_response)(request)
 
     def request_access(self):
         """Simulates the request sent by the user browser to the server"""
@@ -56,6 +56,8 @@ def test_detect_when_using_localhost(get_response):
     """It should give access to the user when using localhost"""
     detector = Detector(get_response)
     response = detector.request_resource(LOCALHOST)
+    assert response.status_code == 302
+    response = detector.request_access()
     assert response.status_code == 200
 
 
