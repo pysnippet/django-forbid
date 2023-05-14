@@ -1,13 +1,12 @@
-from datetime import datetime
+from .skills.forbid_device import ForbidDeviceMiddleware
+from .skills.forbid_location import ForbidLocationMiddleware
+from .skills.forbid_network import ForbidNetworkMiddleware
 
-from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
-from django.utils.timezone import utc
-
-from .config import Settings
-from .skills.forbid_location import forbid_location
-from .skills.forbid_network import forbid_network
-from .skills.forbid_device import forbid_device
+__skills__ = (
+    ForbidDeviceMiddleware,
+    ForbidLocationMiddleware,
+    ForbidNetworkMiddleware,
+)
 
 
 class ForbidMiddleware:
@@ -17,28 +16,6 @@ class ForbidMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Detects the user's device and saves it in the session.
-        if forbid_device(request):
-            if Settings.has("OPTIONS.URL.FORBIDDEN_KIT"):
-                return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_KIT"))
-            return HttpResponseForbidden()
-
-        # Checks if the PERIOD attr is set and the user has been granted access.
-        if Settings.has("OPTIONS.PERIOD") and request.session.has_key("ACCESS"):
-            acss = datetime.utcnow().replace(tzinfo=utc).timestamp()
-
-            # Checks if access is not timed out yet.
-            if acss - request.session.get("ACCESS") < Settings.get("OPTIONS.PERIOD"):
-                return forbid_network(self.get_response, request)
-
-        # Checks if access is granted when timeout is reached.
-        if forbid_location(request):
-            acss = datetime.utcnow().replace(tzinfo=utc)
-            request.session["ACCESS"] = acss.timestamp()
-            return forbid_network(self.get_response, request)
-
-        # Redirects to the FORBIDDEN_LOC URL if set.
-        if Settings.has("OPTIONS.URL.FORBIDDEN_LOC"):
-            return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_LOC"))
-
-        return HttpResponseForbidden()
+        for skill in __skills__:
+            self.get_response = skill(self.get_response)
+        return self.get_response(request)
