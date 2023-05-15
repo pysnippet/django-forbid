@@ -45,7 +45,8 @@ class ForbidNetworkMiddleware:
         if all(map(request.session.has_key, ("tz", *response_attributes))):
             # Handles if the user's timezone differs from the
             # one determined by GeoIP API. If so, VPN is used.
-            if request.session.get("tz") != "N/A" and request.POST.get("timezone", "N/A") != request.session.get("tz"):
+            if request.session.get("tz") != "N/A" and \
+                    request.POST.get("timezone", "N/A") != request.session.get("tz"):
                 erase_response_attributes()
                 # Redirects to the FORBIDDEN_VPN URL if set.
                 if Settings.has("OPTIONS.URL.FORBIDDEN_VPN"):
@@ -53,7 +54,9 @@ class ForbidNetworkMiddleware:
                 return HttpResponseForbidden()
 
             # Restores the response from the session.
-            response = HttpResponse(**{attr: request.session.get(attr) for attr in response_attributes})
+            response = HttpResponse(**{
+                attr: request.session.get(attr) for attr in response_attributes
+            })
             if hasattr(response, "headers"):
                 response.headers = json.loads(request.session.get("headers"))
             request.session["ACCESS"] = access
