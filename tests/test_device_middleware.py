@@ -24,11 +24,19 @@ request = factory.get("/")
 request.session = {}
 
 
-def get_status_code(get_response, user_agent):
+def forbids(get_response, user_agent):
     request.session["DEVICE"] = None
     request.META["HTTP_USER_AGENT"] = user_agent
     response = ForbidDeviceMiddleware(get_response)(request)
-    return response.status_code
+    return response.status_code == 403
+
+
+def test_access_with_empty_list_of_devices(get_response):
+    """Should allow access to all devices if no config is provided."""
+    for device_ua in (peripheral_ua, smartphone_ua, wearable_ua, phablet_ua,
+                      desktop_ua, console_ua, display_ua, speaker_ua, camera_ua,
+                      tablet_ua, player_ua, phone_ua, car_ua, tv_ua, unknown_ua):
+        assert not forbids(get_response, device_ua)
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": []})
@@ -37,7 +45,7 @@ def test_access_with_empty_list_of_devices(get_response):
     for device_ua in (peripheral_ua, smartphone_ua, wearable_ua, phablet_ua,
                       desktop_ua, console_ua, display_ua, speaker_ua, camera_ua,
                       tablet_ua, player_ua, phone_ua, car_ua, tv_ua, unknown_ua):
-        assert get_status_code(get_response, device_ua) == 200
+        assert not forbids(get_response, device_ua)
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["desktop", "smartphone", "console", "tablet", "tv"]})
@@ -45,9 +53,9 @@ def test_access_desktops_smartphones_consoles_tablets_and_tvs(get_response):
     """Should allow access to desktops, smartphones, consoles, tablets and TVs."""
     for device_ua in (peripheral_ua, wearable_ua, phablet_ua, display_ua,
                       speaker_ua, camera_ua, player_ua, phone_ua, car_ua, unknown_ua):
-        assert get_status_code(get_response, device_ua) != 200
+        assert forbids(get_response, device_ua)
     for device_ua in (desktop_ua, smartphone_ua, console_ua, tablet_ua, tv_ua):
-        assert get_status_code(get_response, device_ua) == 200
+        assert not forbids(get_response, device_ua)
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["!car", "!speaker", "!wearable"]})
@@ -55,9 +63,9 @@ def test_forbid_access_to_cars_speakers_and_wearables(get_response):
     """Should forbid access to cars, speakers and wearables."""
     for device_ua in (peripheral_ua, smartphone_ua, phablet_ua, desktop_ua, console_ua,
                       display_ua, camera_ua, tablet_ua, player_ua, phone_ua, tv_ua):
-        assert get_status_code(get_response, device_ua) == 200
+        assert not forbids(get_response, device_ua)
     for device_ua in (car_ua, speaker_ua, wearable_ua, unknown_ua):
-        assert get_status_code(get_response, device_ua) != 200
+        assert forbids(get_response, device_ua)
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["!phablet", "tablet", "phablet"]})
@@ -66,11 +74,11 @@ def test_forbid_access_if_same_device_is_listed_as_permitted_and_forbidden(get_r
     for device_ua in (peripheral_ua, smartphone_ua, phablet_ua, desktop_ua,
                       console_ua, display_ua, camera_ua, player_ua, phone_ua,
                       tv_ua, car_ua, speaker_ua, wearable_ua, unknown_ua):
-        assert get_status_code(get_response, device_ua) != 200
-    assert get_status_code(get_response, tablet_ua) == 200
+        assert forbids(get_response, device_ua)
+    assert not forbids(get_response, tablet_ua)
 
 
 @override_settings(DJANGO_FORBID={"DEVICES": ["smartphone", "phablet", "tablet"]})
 def test_forbid_access_unknown_devices_if_devices_are_set(get_response):
     """Should forbid access to unknown devices if the list of devices is not empty."""
-    assert get_status_code(get_response, unknown_ua) != 200
+    assert forbids(get_response, unknown_ua)

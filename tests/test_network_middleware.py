@@ -9,6 +9,20 @@ IP_LONDON = "212.102.63.59"
 IP_ZURICH = "146.70.99.178"
 
 
+def skips(get_response, ip_address, ajax=False):
+    detector = Detector(get_response, ajax=ajax)
+    response = detector.request_resource(ip_address)
+    return response.status_code == 200
+
+
+def forbids(get_response, ip_address):
+    detector = Detector(get_response)
+    response = detector.request_resource(ip_address)
+    assert response.status_code == 302
+    response = detector.request_access()
+    return response.status_code == 403
+
+
 class SessionStore(dict):
     def has_key(self, key):
         return key in self
@@ -51,64 +65,50 @@ class Detector:
         return ForbidNetworkMiddleware(self.get_response)(request)
 
 
+def test_detect_no_config(get_response):
+    """It should give access everyone when no config is provided"""
+    assert skips(get_response, LOCALHOST)
+    assert skips(get_response, IP_LONDON)
+    assert skips(get_response, IP_ZURICH)
+
+
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": False}})
+def test_detect_when_vpn_disabled(get_response):
+    """It should give access everyone when VPN is disabled"""
+    assert skips(get_response, LOCALHOST)
+    assert skips(get_response, IP_LONDON)
+    assert skips(get_response, IP_ZURICH)
+
+
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_localhost(get_response):
     """It should give access to the user when using localhost"""
-    detector = Detector(get_response)
-    response = detector.request_resource(LOCALHOST)
-    assert response.status_code == 302
-    response = detector.request_access()
-    assert response.status_code == 200
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_localhost_ajax(get_response):
-    """It should give access to the user when request is done by AJAX"""
-    detector = Detector(get_response, True)
-    response = detector.request_resource(LOCALHOST)
-    assert response.status_code == 200
+    assert not forbids(get_response, LOCALHOST)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_nonlocal_ip(get_response):
     """User should pass through two requests to access the resource"""
-    detector = Detector(get_response)
-    response = detector.request_resource(IP_LONDON)
-    assert response.status_code == 302
-    response = detector.request_access()
-    assert response.status_code == 200
+    assert not forbids(get_response, IP_LONDON)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_using_vpn(get_response):
     """User should be forbidden to access the resource when using VPN"""
-    detector = Detector(get_response)
-    response = detector.request_resource(IP_ZURICH)
-    assert response.status_code == 302
-    response = detector.request_access()
-    assert response.status_code == 403
+    assert forbids(get_response, IP_ZURICH)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
 def test_detect_when_turns_off_vpn_after_using(get_response):
     """User should get access to the resource when VPN is turned off"""
-    detector = Detector(get_response)
-    response = detector.request_resource(IP_ZURICH)
-    assert response.status_code == 302
-    response = detector.request_access()
-    assert response.status_code == 403
+    assert forbids(get_response, IP_ZURICH)
 
     # Turn off VPN - back to London
-    detector = Detector(get_response)
-    response = detector.request_resource(IP_LONDON)
-    assert response.status_code == 302
-    response = detector.request_access()
-    assert response.status_code == 200
+    assert not forbids(get_response, IP_LONDON)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_nonlocal_ip_ajax(get_response):
+def test_detect_when_using_ajax(get_response):
     """It should give access to the user when request is done by AJAX"""
-    detector = Detector(get_response, True)
-    response = detector.request_resource(IP_LONDON)
-    assert response.status_code == 200
+    assert skips(get_response, LOCALHOST, True)
+    assert skips(get_response, IP_LONDON, True)
