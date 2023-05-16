@@ -1,12 +1,9 @@
-from django.test import RequestFactory
 from django.test import override_settings
-
 from django_forbid.skills.forbid_location import ForbidLocationMiddleware
 from django_forbid.skills.forbid_network import ForbidNetworkMiddleware
 
-LOCALHOST = "localhost"
-IP_LONDON = "212.102.63.59"
-IP_ZURICH = "146.70.99.178"
+from tests import IP
+from tests import WSGIRequest
 
 
 def skips(get_response, ip_address, ajax=False):
@@ -23,33 +20,9 @@ def forbids(get_response, ip_address):
     return response.status_code == 403
 
 
-class SessionStore(dict):
-    def has_key(self, key):
-        return key in self
-
-
-class WSGIRequest:
-    def __init__(self, accept):
-        self.accept = accept
-        self.session = SessionStore()
-
-    def get(self):
-        request = RequestFactory().get("/")
-        request.session = self.session
-        request.META["HTTP_ACCEPT"] = self.accept
-        return request
-
-    def post(self, data):
-        request = RequestFactory().post("/", data)
-        request.session = self.session
-        request.META["HTTP_ACCEPT"] = self.accept
-        return request
-
-
 class Detector:
     def __init__(self, get_response, ajax=False):
-        access = "*/*" if ajax else "text/html"
-        self.request = WSGIRequest(access)
+        self.request = WSGIRequest(ajax)
         self.get_response = get_response
 
     def request_resource(self, ip_address=""):
@@ -65,50 +38,33 @@ class Detector:
         return ForbidNetworkMiddleware(self.get_response)(request)
 
 
-def test_detect_no_config(get_response):
+def test_should_allow_all_when_no_config_provided(get_response):
     """It should give access everyone when no config is provided"""
-    assert skips(get_response, LOCALHOST)
-    assert skips(get_response, IP_LONDON)
-    assert skips(get_response, IP_ZURICH)
+    for ip_address in IP.all:
+        assert skips(get_response, ip_address)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": False}})
-def test_detect_when_vpn_disabled(get_response):
+def test_should_allow_all_when_vpn_disabled(get_response):
     """It should give access everyone when VPN is disabled"""
-    assert skips(get_response, LOCALHOST)
-    assert skips(get_response, IP_LONDON)
-    assert skips(get_response, IP_ZURICH)
+    for ip_address in IP.all:
+        assert skips(get_response, ip_address)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_localhost(get_response):
-    """It should give access to the user when using localhost"""
-    assert not forbids(get_response, LOCALHOST)
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_nonlocal_ip(get_response):
-    """User should pass through two requests to access the resource"""
-    assert not forbids(get_response, IP_LONDON)
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_vpn(get_response):
-    """User should be forbidden to access the resource when using VPN"""
-    assert forbids(get_response, IP_ZURICH)
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_turns_off_vpn_after_using(get_response):
-    """User should get access to the resource when VPN is turned off"""
-    assert forbids(get_response, IP_ZURICH)
-
+def test_should_allow_users_only_from_great_britain(get_response):
+    """It should give access to the user from Great Britain"""
+    for ip_address in IP.locals:
+        assert not forbids(get_response, ip_address)
+    assert not forbids(get_response, IP.ip_london)
+    assert forbids(get_response, IP.ip_zurich)
+    assert forbids(get_response, IP.ip_cobain)
     # Turn off VPN - back to London
-    assert not forbids(get_response, IP_LONDON)
+    assert not forbids(get_response, IP.ip_london)
 
 
 @override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_detect_when_using_ajax(get_response):
+def test_should_allow_ajax_requests(get_response):
     """It should give access to the user when request is done by AJAX"""
-    assert skips(get_response, LOCALHOST, True)
-    assert skips(get_response, IP_LONDON, True)
+    for ip_address in IP.all:
+        assert skips(get_response, ip_address, True)

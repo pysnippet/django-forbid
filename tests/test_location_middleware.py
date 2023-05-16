@@ -1,17 +1,10 @@
-from django.test import RequestFactory
 from django.test import override_settings
-
 from django_forbid.skills.forbid_location import ForbidLocationMiddleware
 
-factory = RequestFactory()
-request = factory.get("/")
-request.session = {}
+from tests import IP
+from tests import WSGIRequest
 
-LOCALHOST = "localhost"
-IP_LOCAL1 = "0.0.0.0"
-IP_LOCAL2 = "127.0.0.1"
-IP_LONDON = "212.102.63.59"
-IP_ZURICH = "146.70.99.178"
+request = WSGIRequest().get()
 
 
 def forbids(get_response, ip_address):
@@ -20,89 +13,49 @@ def forbids(get_response, ip_address):
     return response.status_code == 403
 
 
-def test_access_without_configuration(get_response):
+def test_should_allow_all_when_no_config_provided(get_response):
     """If no configuration is provided, access is granted everywhere."""
-    assert not forbids(get_response, LOCALHOST)
-
-
-def test_access_no_config(get_response):
-    """If no config is set, access is granted everywhere."""
-    assert not forbids(get_response, LOCALHOST)
-    assert not forbids(get_response, IP_LOCAL1)
-    assert not forbids(get_response, IP_LOCAL2)
-    assert not forbids(get_response, IP_LONDON)
-    assert not forbids(get_response, IP_ZURICH)
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_access_forbid_vpn(get_response):
-    """If VPN detection is enabled, access is granted everywhere."""
-    assert not forbids(get_response, LOCALHOST)
-    assert not forbids(get_response, IP_LOCAL1)
-    assert not forbids(get_response, IP_LOCAL2)
-    assert not forbids(get_response, IP_LONDON)
-    assert not forbids(get_response, IP_ZURICH)
+    for ip_address in IP.all:
+        assert not forbids(get_response, ip_address)
 
 
 @override_settings(DJANGO_FORBID={"COUNTRIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}}, DEBUG=True)
-def test_access_from_localhost_development_mode(get_response):
+def test_should_allow_all_when_development_mode(get_response):
     """In development mode, access is granted from localhost."""
-    assert not forbids(get_response, IP_LOCAL1)
-    assert not forbids(get_response, IP_LOCAL2)
-    assert not forbids(get_response, LOCALHOST)
+    for ip_address in IP.locals:
+        assert not forbids(get_response, ip_address)
 
 
 @override_settings(DJANGO_FORBID={"COUNTRIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}})
-def test_access_from_localhost_production_mode(get_response):
+def test_should_forbid_all_when_production_mode(get_response):
     """In production mode, access is not granted from localhost."""
-    assert forbids(get_response, IP_LOCAL1)
-    assert forbids(get_response, IP_LOCAL2)
-    assert forbids(get_response, LOCALHOST)
+    for ip_address in IP.locals:
+        assert forbids(get_response, ip_address)
 
 
 @override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"ACTION": "PERMIT"}})
-def test_access_from_gb_when_gb_in_countries_whitelist(get_response):
+def test_should_allow_country_when_country_in_countries_whitelist_otherwise_forbid(get_response):
     """Access is granted from GB when GB is in the counties' whitelist."""
-    assert not forbids(get_response, IP_LONDON)
-
-
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}})
-def test_access_from_gb_when_gb_not_in_countries_whitelist(get_response):
-    """Access is not granted from GB when GB is not in the counties' whitelist."""
-    assert forbids(get_response, IP_LONDON)
+    assert not forbids(get_response, IP.ip_london)
+    assert forbids(get_response, IP.ip_zurich)
 
 
 @override_settings(DJANGO_FORBID={"TERRITORIES": ["EU"], "OPTIONS": {"ACTION": "PERMIT"}})
-def test_access_from_gb_when_eu_in_continent_whitelist(get_response):
+def test_should_allow_country_when_country_in_territories_whitelist_otherwise_forbid(get_response):
     """Access is granted from GB when EU is in the continents' whitelist."""
-    assert not forbids(get_response, IP_LONDON)
-
-
-@override_settings(DJANGO_FORBID={"TERRITORIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}})
-def test_access_from_gb_when_gb_not_in_continent_whitelist(get_response):
-    """Access is not granted from GB when EU is not in the continents' whitelist."""
-    assert forbids(get_response, IP_LONDON)
+    assert not forbids(get_response, IP.ip_london)
+    assert forbids(get_response, IP.ip_cobain)
 
 
 @override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"ACTION": "FORBID"}})
-def test_access_from_gb_when_gb_in_forbidden_countries(get_response):
+def test_should_forbid_country_when_country_in_countries_blacklist_otherwise_allow(get_response):
     """Access is not granted from GB when GB is in the forbidden list."""
-    assert forbids(get_response, IP_LONDON)
-
-
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["RU"], "OPTIONS": {"ACTION": "FORBID"}})
-def test_access_from_gb_when_gb_not_in_forbidden_countries(get_response):
-    """Access is granted from GB when GB is not in the forbidden list."""
-    assert not forbids(get_response, IP_LONDON)
+    assert forbids(get_response, IP.ip_london)
+    assert not forbids(get_response, IP.ip_cobain)
 
 
 @override_settings(DJANGO_FORBID={"TERRITORIES": ["EU"], "OPTIONS": {"ACTION": "FORBID"}})
-def test_access_from_gb_when_eu_in_forbidden_territories(get_response):
+def test_should_forbid_country_when_country_in_territories_blacklist_otherwise_allow(get_response):
     """Access is not granted from GB when EU is in the forbidden list."""
-    assert forbids(get_response, IP_LONDON)
-
-
-@override_settings(DJANGO_FORBID={"TERRITORIES": ["AS"], "OPTIONS": {"ACTION": "FORBID"}})
-def test_access_from_gb_when_eu_not_in_forbidden_territories(get_response):
-    """Access is granted from GB when EU is not in the forbidden list."""
-    assert not forbids(get_response, IP_LONDON)
+    assert forbids(get_response, IP.ip_london)
+    assert not forbids(get_response, IP.ip_cobain)
