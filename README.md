@@ -1,13 +1,14 @@
 # Django Forbid <img src="https://github.com/pysnippet.png" align="right" height="64" />
 
-Secure your Django app by controlling the access - grant or deny user access based on device and location, including VPN
-detection.
-
 [![PyPI](https://img.shields.io/pypi/v/django-forbid.svg)](https://pypi.org/project/django-forbid/)
 [![Python](https://img.shields.io/pypi/pyversions/django-forbid.svg?logoColor=white)](https://pypi.org/project/django-forbid/)
 [![Django](https://img.shields.io/pypi/djversions/django-forbid.svg?color=0C4B33&label=django)](https://pypi.org/project/django-forbid/)
 [![License](https://img.shields.io/pypi/l/django-forbid.svg)](https://github.com/pysnippet/django-forbid/blob/master/LICENSE)
 [![Tests](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml)
+
+Django Forbid aims to make website access managed and secure for the maintainers. It provides a middleware to grant or
+deny user access based on device and/or location. It also supports VPN detection for banning users who want to lie about
+their country and geolocation. Also, users can use only the VPN detection feature or disable it.
 
 ## Install
 
