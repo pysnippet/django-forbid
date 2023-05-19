@@ -1,6 +1,7 @@
 export default {
     title: "Django Forbid",
     description: "Manage access to your Django apps",
+    head: [["link", {rel: "icon", type: "image/x-icon", href: "/logo.png"}]],
     themeConfig: {
         siteTitle: "Django Forbid",
         socialLinks: [
@@ -16,10 +17,28 @@ export default {
             },
         ],
         nav: [
-            {text: "About", link: "/about/"},
+            {text: "Home", link: "/"},
             {text: "Docs", link: "/docs/"},
             {text: "Contributing", link: "https://github.com/pysnippet/.github/blob/master/.github/CONTRIBUTING.md"},
             {text: "Releases", link: "https://github.com/pysnippet/django-forbid/releases"},
+        ],
+        sidebar: [
+            {
+                text: "Integration",
+                items: [
+                    {text: "Getting Started", link: "/docs/"},
+                    {text: "Configuration", link: "/docs/configuration"},
+                    {
+                        text: "Settings",
+                        items: [
+                            {text: "Introduction", link: "/docs/settings/"},
+                            {text: "Location Detection", link: "/docs/settings/location-detection"},
+                            {text: "Device Detection", link: "/docs/settings/device-detection"},
+                            {text: "VPN Detection", link: "/docs/settings/vpn-detection"},
+                        ],
+                    },
+                ],
+            },
         ],
     },
 }
