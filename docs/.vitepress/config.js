@@ -2,6 +2,9 @@ export default {
     title: "Django Forbid",
     description: "Manage access to your Django apps",
     head: [["link", {rel: "icon", type: "image/x-icon", href: "/logo.png"}]],
+    cleanUrls: true,
+    lang: "en-US",
+    base: "/django-forbid/",
     themeConfig: {
         siteTitle: "Django Forbid",
         socialLinks: [
@@ -16,6 +19,9 @@ export default {
                 link: "https://pysnippet.org/",
             },
         ],
+        search: {
+            provider: "local",
+        },
         nav: [
             {text: "Home", link: "/"},
             {text: "Docs", link: "/docs/"},
