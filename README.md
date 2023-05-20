@@ -5,12 +5,13 @@
 [![Django](https://img.shields.io/pypi/djversions/django-forbid.svg?color=0C4B33&label=django)](https://pypi.org/project/django-forbid/)
 [![License](https://img.shields.io/pypi/l/django-forbid.svg)](https://github.com/pysnippet/django-forbid/blob/master/LICENSE)
 [![Tests](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml)
+[![Docs](https://github.com/pysnippet/django-forbid/actions/workflows/docs.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/docs.yml)
 
 Django Forbid aims to make website access managed and secure for the maintainers. It provides a middleware to grant or
 deny user access based on device and/or location. It also supports VPN detection for banning users who want to lie about
 their country and geolocation. Also, users can use only the VPN detection feature or disable it.
 
-## Install
+## Installation
 
 ```shell
 python -m pip install django-forbid
