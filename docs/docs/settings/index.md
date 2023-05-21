@@ -2,7 +2,9 @@
 
 After connecting the Django Forbid to your project, you can define the set of desired zones to be forbidden or allowed.
 All you need is to set the `DJANGO_FORBID` variable in your project's settings. It should be a dictionary with the
-following keys:
+following keys.
+
+## Setting Keys
 
 - `DEVICES` - list of devices to permit or forbid access to
 - `COUNTRIES` - list of countries to permit or forbid access to
@@ -16,6 +18,32 @@ following keys:
         - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
         - `FORBIDDEN_KIT` - the URL to redirect to when the user is using a forbidden device
 
-Unlike the `COUNTRIES` and `TERRITORIES`, where the middleware decides whether to permit or forbid access based on the
-given `ACTION` value, the `DEVICES` list accepts device types where the names starting with `!` are forbidden. This is
-done to make it possible to make them all mix together.
+These variables are all covered in more detail at the [next page](./variables.md).
+
+## Initialization
+
+To initialize the Django Forbid, you need to define the `DJANGO_FORBID` variable. Here is an example of how it can be
+done.
+
+```python
+DJANGO_FORBID = {
+    'DEVICES': ['desktop', 'smartphone', 'console', 'tablet', 'tv'],
+    'COUNTRIES': ['US', 'GB'],
+    'TERRITORIES': ['EU'],
+    'OPTIONS': {
+        'ACTION': 'PERMIT',
+        'PERIOD': 300,
+        'VPN': True,
+        'URL': {
+            'FORBIDDEN_LOC': 'forbidden_location',
+            'FORBIDDEN_VPN': 'forbidden_network',
+            'FORBIDDEN_KIT': 'forbidden_device',
+        },
+    },
+}
+```
+
+In this example, the Django Forbid will permit access to users using the listed devices and forbid entry to users
+worldwide except for the US, UK, and EU countries. It will also forbid access to the users who use VPN to lie about
+their geolocation. The settings also define the period in seconds to check for access again (every 5 minutes) and the
+URLs to redirect to when access is forbidden.

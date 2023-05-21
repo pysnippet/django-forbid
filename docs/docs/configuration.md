@@ -28,8 +28,9 @@ MIDDLEWARE = [
 
 ## GeoIP2
 
-Configuring the `GEOIP_PATH` variable is important. This variable should contain the path to the GeoLite2 database file.
-You can [download](https://dev.maxmind.com/geoip/geoip2/geolite2/) the database from MaxMind's website.
+Configuring the `GEOIP_PATH` variable is important if you are going to use either forbid access by location or detect
+VPN users. This variable should contain the path to the GeoLite2 database file. You
+can [download](https://dev.maxmind.com/geoip/geoip2/geolite2/) the database from MaxMind's website for free.
 The `GeoLite2-City.mmdb` file is enough for this application. The `GEOIP_PATH` variable should be set to the directory
 containing the database file.
 

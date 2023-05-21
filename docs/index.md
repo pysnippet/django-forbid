@@ -23,14 +23,14 @@ hero:
 features:
   - icon: 🛠️
     title: Free and open source
-    details: ...
+    details: Enjoy the freedom of our OSS project, giving you full access to its source code and allowing you to contribute to its development.
   - icon: 🧩
     title: Easy to integrate
-    details: ...
+    details: Incorporate Django Forbid into your existing projects with its straightforward integration process, saving you time.
   - icon: 🚀
     title: Independent features
-    details: ...
+    details: Each feature operates autonomously, allowing you to utilize specific functionalities according to your requirements.
   - icon: ⚡
     title: Compatible with Django 2.1+
-    details: ...
+    details: Django Forbid is fully compatible with Django v2.1 and above, ensuring smooth operation and integration with your application.
 ---
