@@ -1,1 +1,0 @@
-# Forbidding by Device

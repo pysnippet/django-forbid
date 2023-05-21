@@ -38,9 +38,7 @@ export default {
                         text: "Settings",
                         items: [
                             {text: "Introduction", link: "/docs/settings/"},
-                            {text: "Location Detection", link: "/docs/settings/location-detection"},
-                            {text: "Device Detection", link: "/docs/settings/device-detection"},
-                            {text: "VPN Detection", link: "/docs/settings/vpn-detection"},
+                            {text: "Variables", link: "/docs/settings/variables"},
                         ],
                     },
                 ],
