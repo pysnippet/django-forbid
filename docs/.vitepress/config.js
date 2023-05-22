@@ -24,7 +24,7 @@ export default {
         },
         nav: [
             {text: "Home", link: "/"},
-            {text: "Docs", link: "/docs/"},
+            {text: "Docs", link: "/integration/", activeMatch: /integration/},
             {text: "Contributing", link: "https://github.com/pysnippet/.github/blob/master/.github/CONTRIBUTING.md"},
             {text: "Releases", link: "https://github.com/pysnippet/django-forbid/releases"},
         ],
@@ -32,13 +32,13 @@ export default {
             {
                 text: "Integration",
                 items: [
-                    {text: "Getting Started", link: "/docs/"},
-                    {text: "Configuration", link: "/docs/configuration"},
+                    {text: "Getting Started", link: "/integration/"},
+                    {text: "Configuration", link: "/integration/configuration"},
                     {
                         text: "Settings",
                         items: [
-                            {text: "Introduction", link: "/docs/settings/"},
-                            {text: "Variables", link: "/docs/settings/variables"},
+                            {text: "Introduction", link: "/integration/settings/"},
+                            {text: "Variables", link: "/integration/settings/variables"},
                         ],
                     },
                 ],

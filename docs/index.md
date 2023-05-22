@@ -15,7 +15,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /docs/
+      link: /integration/
     - theme: alt
       text: View on GitHub
       link: https://github.com/pysnippet/django-forbid
