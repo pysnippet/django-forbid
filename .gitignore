@@ -3,3 +3,8 @@
 .pytest_cache
 *.egg-info
 __pycache__
+
+docs/node_modules
+docs/package-lock.json
+docs/.vitepress/cache
+docs/.vitepress/dist
