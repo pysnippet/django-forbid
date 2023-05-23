@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.utils.timezone import utc
 
-from ..config import Settings
+from . import Settings
 
 
 class ForbidNetworkMiddleware:

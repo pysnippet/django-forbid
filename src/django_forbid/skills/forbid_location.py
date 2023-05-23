@@ -4,7 +4,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from geoip2.errors import AddressNotFoundError
 
-from ..config import Settings
+from . import Settings
 
 
 class Rule:
@@ -89,10 +89,10 @@ class ForbidLocationMiddleware:
         city = dict()
         address = request.META.get("REMOTE_ADDR")
         address = request.META.get("HTTP_X_FORWARDED_FOR", address)
-        ip_address = address.split(",")[0].strip()
+        client_ip = address.split(",")[0].strip()
 
         try:
-            city = Access.geoip.city(ip_address)
+            city = Access.geoip.city(client_ip)
 
             # Creates an instance of the Access class
             # and checks if the IP address is granted.
