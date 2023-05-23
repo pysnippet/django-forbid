@@ -34,7 +34,7 @@ class Detector:
 
     def request_access(self):
         """Simulates the request sent by the user browser to the server"""
-        request = self.request.post({"timezone": "Europe/London"})
+        request = self.request.post({"CLIENT_TZ": "Europe/London"})
         return ForbidNetworkMiddleware(self.get_response)(request)
 
 

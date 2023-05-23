@@ -112,7 +112,7 @@ class ForbidLocationMiddleware:
             # POST request sent from user's browser
             # to detect if the user is using VPN.
             timezone = city.get("time_zone", "N/A")
-            request.session["tz"] = timezone
+            request.session["GEOIP2_TZ"] = timezone
 
         if granted:
             return self.get_response(request)
