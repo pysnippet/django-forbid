@@ -3,7 +3,6 @@
 [![PyPI](https://img.shields.io/pypi/v/django-forbid.svg)](https://pypi.org/project/django-forbid/)
 [![Python](https://img.shields.io/pypi/pyversions/django-forbid.svg?logoColor=white)](https://pypi.org/project/django-forbid/)
 [![Django](https://img.shields.io/pypi/djversions/django-forbid.svg?color=0C4B33&label=django)](https://pypi.org/project/django-forbid/)
-[![License](https://img.shields.io/pypi/l/django-forbid.svg)](https://github.com/pysnippet/django-forbid/blob/master/LICENSE)
 [![Tests](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/tests.yml)
 [![Docs](https://github.com/pysnippet/django-forbid/actions/workflows/docs.yml/badge.svg)](https://github.com/pysnippet/django-forbid/actions/workflows/docs.yml)
 
@@ -53,7 +52,6 @@ following keys:
 - `TERRITORIES` - list of territories to permit or forbid access to
 - `OPTIONS` - a dictionary for additional settings
     - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
-    - `PERIOD` - time in seconds to check for access again, 0 means on each request
     - `VPN` - use VPN detection and forbid access to VPN users
     - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
         - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
@@ -85,7 +83,6 @@ DJANGO_FORBID = {
     'TERRITORIES': ['EU'],
     'OPTIONS': {
         'ACTION': 'PERMIT',
-        'PERIOD': 300,
         'VPN': True,
         'URL': {
             'FORBIDDEN_LOC': 'forbidden_location',

@@ -65,7 +65,7 @@ alpha-2 codes, and the list of available continent codes (territories) are:
 - Type: `dict`
 
 The `OPTIONS` are secondary settings for enabling additional features and customizing primary settings behavior. The
-available options are: `ACTION`, `PERIOD`, `VPN` and `URL`.
+available options are: `ACTION`, `VPN` and `URL`.
 
 ### Action
 
@@ -76,16 +76,6 @@ available options are: `ACTION`, `PERIOD`, `VPN` and `URL`.
 Unlike the `DEVICES` list, where the middleware decides whether to permit or forbid access based on the `!` prefix,
 the `COUNTRIES` and `TERRITORIES` use the `ACTION` variable that defines the action that needs to be performed for the
 users from the listed countries or territories. Possible values are `FORBID` and `PERMIT`.
-
-### Period
-
-- Key: `PERIOD`
-- Type: `int`
-- Default: `0`
-
-The `PERIOD` variable defines the period of time in seconds for the next access check to the requested resource. It is
-optimal to set this when VPN detection is enabled so that users will not be disgusted by frequent redirections - with
-the default value, it will check for VPN for each done request.
 
 ### VPN
 
