@@ -11,7 +11,7 @@ request = wsgi.get()
 def forbids(get_response, request):
     response = ForbidMiddleware(get_response)(request)
     if response.status_code == 302:
-        request = wsgi.post({"timezone": "Europe/London"})
+        request = wsgi.post({"CLIENT_TZ": "Europe/London"})
         response = ForbidMiddleware(get_response)(request)
     return response.status_code == 403
 

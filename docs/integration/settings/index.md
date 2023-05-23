@@ -11,7 +11,6 @@ following keys.
 - `TERRITORIES` - list of territories to permit or forbid access to
 - `OPTIONS` - a dictionary for additional settings
     - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
-    - `PERIOD` - time in seconds to check for access again, 0 means on each request
     - `VPN` - use VPN detection and forbid access to VPN users
     - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
         - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
@@ -32,7 +31,6 @@ DJANGO_FORBID = {
     'TERRITORIES': ['EU'],
     'OPTIONS': {
         'ACTION': 'PERMIT',
-        'PERIOD': 300,
         'VPN': True,
         'URL': {
             'FORBIDDEN_LOC': 'forbidden_location',
@@ -45,5 +43,4 @@ DJANGO_FORBID = {
 
 In this example, the Django Forbid will permit access to users using the listed devices and forbid entry to users
 worldwide except for the US, UK, and EU countries. It will also forbid access to the users who use VPN to lie about
-their geolocation. The settings also define the period in seconds to check for access again (every 5 minutes) and the
-URLs to redirect to when access is forbidden.
+their geolocation. The settings also define the URLs to redirect to when access is forbidden.

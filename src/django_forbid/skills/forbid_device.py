@@ -4,7 +4,7 @@ from device_detector import DeviceDetector
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 
-from ..config import Settings
+from . import Settings
 
 
 def normalize(device_type):
