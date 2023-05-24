@@ -19,42 +19,42 @@ def test_should_allow_all_when_no_config_provided(get_response):
         assert not forbids(get_response, ip_address)
 
 
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}}, DEBUG=True)
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["US"]}, DEBUG=True)
 def test_should_allow_all_when_development_mode(get_response):
     """In development mode, access is granted from localhost."""
     for ip_address in IP.locals:
         assert not forbids(get_response, ip_address)
 
 
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["US"], "OPTIONS": {"ACTION": "PERMIT"}})
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["US"]})
 def test_should_forbid_all_when_production_mode(get_response):
     """In production mode, access is not granted from localhost."""
     for ip_address in IP.locals:
         assert forbids(get_response, ip_address)
 
 
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"ACTION": "PERMIT"}})
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"]})
 def test_should_allow_country_when_country_in_countries_whitelist_otherwise_forbid(get_response):
     """Access is granted from GB when GB is in the counties' whitelist."""
     assert not forbids(get_response, IP.ip_london)
     assert forbids(get_response, IP.ip_zurich)
 
 
-@override_settings(DJANGO_FORBID={"TERRITORIES": ["EU"], "OPTIONS": {"ACTION": "PERMIT"}})
+@override_settings(DJANGO_FORBID={"TERRITORIES": ["EU"]})
 def test_should_allow_country_when_country_in_territories_whitelist_otherwise_forbid(get_response):
     """Access is granted from GB when EU is in the continents' whitelist."""
     assert not forbids(get_response, IP.ip_london)
     assert forbids(get_response, IP.ip_cobain)
 
 
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"ACTION": "FORBID"}})
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["!GB"]})
 def test_should_forbid_country_when_country_in_countries_blacklist_otherwise_allow(get_response):
     """Access is not granted from GB when GB is in the forbidden list."""
     assert forbids(get_response, IP.ip_london)
     assert not forbids(get_response, IP.ip_cobain)
 
 
-@override_settings(DJANGO_FORBID={"TERRITORIES": ["EU"], "OPTIONS": {"ACTION": "FORBID"}})
+@override_settings(DJANGO_FORBID={"TERRITORIES": ["!EU"]})
 def test_should_forbid_country_when_country_in_territories_blacklist_otherwise_allow(get_response):
     """Access is not granted from GB when EU is in the forbidden list."""
     assert forbids(get_response, IP.ip_london)
