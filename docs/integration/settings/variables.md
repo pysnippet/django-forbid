@@ -14,7 +14,7 @@ Django Forbid features by setting the corresponding variables for the desired fe
 - Default: `[]`
 
 The list of devices to permit or forbid access to. The list accepts device types where the names starting with the `!`
-prefix are forbidden. This is done to make it possible to make `DEVICES`, `COUNTRIES`, and `TERRITORIES` mix together.
+prefix are forbidden.
 
 The list of available device types are:
 
@@ -39,8 +39,9 @@ The list of available device types are:
 - Type: `list`
 - Default: `[]`
 
-The list of countries to permit or forbid access to. Countries are defined by their ISO 3166 alpha-2 codes, and the list
-of all codes can be found [here](https://www.iban.com/country-codes).
+The list of countries to permit or forbid access to. The list accepts country codes in ISO 3166 alpha-2 format, where
+the ones starting with the `!` prefix are forbidden. The list of all codes can be
+found [here](https://www.iban.com/country-codes).
 
 ## Territories
 
@@ -48,8 +49,9 @@ of all codes can be found [here](https://www.iban.com/country-codes).
 - Type: `list`
 - Default: `[]`
 
-The list of territories to permit or forbid access to. As countries, territories are also defined by their ISO 3166
-alpha-2 codes, and the list of available continent codes (territories) are:
+The list of territories to permit or forbid access to. As countries, the list of territories accepts continent codes in
+ISO 3166 alpha-2 format, where the ones starting with the `!` prefix are forbidden. The list of available continent
+codes (territories) are:
 
 - `AF` - Africa
 - `AN` - Antarctica
@@ -65,17 +67,7 @@ alpha-2 codes, and the list of available continent codes (territories) are:
 - Type: `dict`
 
 The `OPTIONS` are secondary settings for enabling additional features and customizing primary settings behavior. The
-available options are: `ACTION`, `VPN` and `URL`.
-
-### Action
-
-- Key: `ACTION`
-- Type: `str`
-- Default: `FORBID`
-
-Unlike the `DEVICES` list, where the middleware decides whether to permit or forbid access based on the `!` prefix,
-the `COUNTRIES` and `TERRITORIES` use the `ACTION` variable that defines the action that needs to be performed for the
-users from the listed countries or territories. Possible values are `FORBID` and `PERMIT`.
+available options are: `VPN` and `URL`.
 
 ### VPN
 
