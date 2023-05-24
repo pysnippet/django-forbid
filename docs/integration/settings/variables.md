@@ -100,16 +100,16 @@ the default Django 403 page. The URL can be absolute or relative.
 
 #### Forbidden Network
 
-- Key: `FORBIDDEN_VPN`
+- Key: `FORBIDDEN_NET`
 - Type: `str`
 - Default: `''`
 
-This URL is used when the user is using a virtual private network (VPN). If not specified, the user will see the default
-Django 403 page. The URL can be absolute or relative.
+This URL is used when the user is using a virtual private network (VPN) while VPN detection is enabled. If not
+specified, the user will see the default Django 403 page. The URL can be absolute or relative.
 
 #### Forbidden Device
 
-- Key: `FORBIDDEN_KIT`
+- Key: `FORBIDDEN_DEV`
 - Type: `str`
 - Default: `''`
 
