@@ -12,9 +12,9 @@ following keys.
 - `OPTIONS` - a dictionary for additional settings
     - `VPN` - use VPN detection and forbid access to VPN users
     - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
-        - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
-        - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
-        - `FORBIDDEN_KIT` - the URL to redirect to when the user is using a forbidden device
+        - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden geolocation
+        - `FORBIDDEN_NET` - the URL to redirect to when the user is using a forbidden network (VPN)
+        - `FORBIDDEN_DEV` - the URL to redirect to when the user is using a forbidden device
 
 These variables are all covered in more detail at the [next page](./variables.md).
 
@@ -32,8 +32,8 @@ DJANGO_FORBID = {
         'VPN': True,
         'URL': {
             'FORBIDDEN_LOC': 'forbidden_location',
-            'FORBIDDEN_VPN': 'forbidden_network',
-            'FORBIDDEN_KIT': 'forbidden_device',
+            'FORBIDDEN_NET': 'forbidden_network',
+            'FORBIDDEN_DEV': 'forbidden_device',
         },
     },
 }
