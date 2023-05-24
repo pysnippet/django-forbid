@@ -39,8 +39,8 @@ class ForbidDeviceMiddleware:
         if Access(devices).grants(device_type):
             return self.get_response(request)
 
-        # Redirects to the FORBIDDEN_KIT URL if set.
-        if Settings.has("OPTIONS.URL.FORBIDDEN_KIT"):
-            return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_KIT"))
+        # Redirects to the FORBIDDEN_DEV URL if set.
+        if Settings.has("OPTIONS.URL.FORBIDDEN_DEV"):
+            return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_DEV"))
 
         return HttpResponseForbidden()

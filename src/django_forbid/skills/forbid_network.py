@@ -42,9 +42,9 @@ class ForbidNetworkMiddleware:
 
             if geoip2_tz != "N/A" and client_tz != geoip2_tz:
                 erase_response_attributes()
-                # Redirects to the FORBIDDEN_VPN URL if set.
-                if Settings.has("OPTIONS.URL.FORBIDDEN_VPN"):
-                    return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_VPN"))
+                # Redirects to the FORBIDDEN_NET URL if set.
+                if Settings.has("OPTIONS.URL.FORBIDDEN_NET"):
+                    return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_NET"))
                 return HttpResponseForbidden()
 
             # Restores the response from the session.
