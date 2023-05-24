@@ -1,25 +1,9 @@
-import re
-
 from device_detector import DeviceDetector
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 
+from . import Access
 from . import Settings
-
-
-def normalize(device_type):
-    """Removes the "!" prefix from the device type."""
-    return device_type[1:]
-
-
-def forbidden(device_type):
-    """Checks if the device type is forbidden."""
-    return device_type.startswith("!")
-
-
-def permitted(device_type):
-    """Checks if the device type is permitted."""
-    return not forbidden(device_type)
 
 
 class ForbidDeviceMiddleware:
@@ -37,15 +21,14 @@ class ForbidDeviceMiddleware:
             "car browser": "car",
         }
 
-        device_type = request.session.get("DEVICE")
         devices = Settings.get("DEVICES", [])
+        device_type = request.session.get("DEVICE")
 
-        # Permit all devices if the
-        # DEVICES setting is empty.
+        # Skip if DEVICES empty.
         if not devices:
             return self.get_response(request)
 
-        if not request.session.get("DEVICE"):
+        if not device_type:
             http_ua = request.META.get("HTTP_USER_AGENT")
             device_detector = DeviceDetector(http_ua)
             device_detector = device_detector.parse()
@@ -53,17 +36,7 @@ class ForbidDeviceMiddleware:
             device_type = device_aliases.get(device, device)
             request.session["DEVICE"] = device_type
 
-        # Creates a regular expression in the following form:
-        # ^(?=PERMITTED_DEVICES)(?:(?!FORBIDDEN_DEVICES)\w)+$
-        # where the list of forbidden and permitted devices are
-        # filtered from the DEVICES setting by the "!" prefix.
-        permit = r"|".join(filter(permitted, devices))
-        forbid = r"|".join(map(normalize, filter(forbidden, devices)))
-        forbid = r"(?!" + forbid + r")" if forbid else ""
-        regexp = r"^(?=" + permit + r")(?:" + forbid + r"\w)+$"
-
-        # Regexp designed to match the permitted devices.
-        if re.match(regexp, device_type):
+        if Access(devices).grants(device_type):
             return self.get_response(request)
 
         # Redirects to the FORBIDDEN_KIT URL if set.

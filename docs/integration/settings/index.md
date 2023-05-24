@@ -10,7 +10,6 @@ following keys.
 - `COUNTRIES` - list of countries to permit or forbid access to
 - `TERRITORIES` - list of territories to permit or forbid access to
 - `OPTIONS` - a dictionary for additional settings
-    - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
     - `VPN` - use VPN detection and forbid access to VPN users
     - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
         - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
@@ -30,7 +29,6 @@ DJANGO_FORBID = {
     'COUNTRIES': ['US', 'GB'],
     'TERRITORIES': ['EU'],
     'OPTIONS': {
-        'ACTION': 'PERMIT',
         'VPN': True,
         'URL': {
             'FORBIDDEN_LOC': 'forbidden_location',

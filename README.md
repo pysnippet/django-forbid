@@ -51,24 +51,11 @@ following keys:
 - `COUNTRIES` - list of countries to permit or forbid access to
 - `TERRITORIES` - list of territories to permit or forbid access to
 - `OPTIONS` - a dictionary for additional settings
-    - `ACTION` - whether to `PERMIT` or `FORBID` access to the listed zones (default is `FORBID`)
     - `VPN` - use VPN detection and forbid access to VPN users
     - `URL` - set of URLs to redirect to when the user is located in a forbidden country or using a VPN
         - `FORBIDDEN_LOC` - the URL to redirect to when the user is located in a forbidden country
         - `FORBIDDEN_VPN` - the URL to redirect to when the user is using a VPN
         - `FORBIDDEN_KIT` - the URL to redirect to when the user is using a forbidden device
-
-Unlike the `COUNTRIES` and `TERRITORIES`, where the middleware decides whether to permit or forbid access based on the
-given `ACTION` value, the `DEVICES` list accepts device types where the names starting with `!` are forbidden. This is
-done to make it possible to make them all mix together.
-
-```python
-# Forbid access to all devices that have a small screen.
-'DEVICES': ['!car', '!player', '!peripheral', '!camera']
-
-# Allow access to all devices having regular or large screens.
-'DEVICES': ['desktop', 'smartphone', 'console', 'tablet', 'tv']
-```
 
 The available device types are: `smartphone`, `peripheral` - refers to all hardware components that are attached to a
 computer, `wearable` - common types of wearable technology include smartwatches and smartglasses, `phablet` - a
@@ -82,7 +69,6 @@ DJANGO_FORBID = {
     'COUNTRIES': ['US', 'GB'],
     'TERRITORIES': ['EU'],
     'OPTIONS': {
-        'ACTION': 'PERMIT',
         'VPN': True,
         'URL': {
             'FORBIDDEN_LOC': 'forbidden_location',

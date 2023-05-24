@@ -1,7 +1,8 @@
 from django.test import override_settings
 from django_forbid.middleware import ForbidMiddleware
 
-from tests import IP, Header
+from tests import Header
+from tests import IP
 from tests import WSGIRequest
 
 wsgi = WSGIRequest()
@@ -35,7 +36,7 @@ def test_should_allow_users_when_device_is_desktop(get_response):
         assert not forbids(get_response, request)
 
 
-@override_settings(DJANGO_FORBID={"TERRITORIES": ["NA"]})
+@override_settings(DJANGO_FORBID={"TERRITORIES": ["!NA"]})
 def test_should_forbid_users_when_country_in_territories_blacklist(get_response):
     """Should forbid access to users from territories in blacklist."""
     for ip_address in IP.all:
@@ -46,7 +47,7 @@ def test_should_forbid_users_when_country_in_territories_blacklist(get_response)
         assert not forbids(get_response, request)
 
 
-@override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"ACTION": "PERMIT", "VPN": True}})
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"], "OPTIONS": {"VPN": True}})
 def test_should_allow_users_when_country_in_countries_whitelist(get_response):
     for ip_address in IP.all:
         request.META["HTTP_X_FORWARDED_FOR"] = ip_address
