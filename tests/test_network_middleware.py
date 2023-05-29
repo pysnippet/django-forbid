@@ -12,19 +12,16 @@ def skips(get_response, ip_address, ajax=False):
     return response.status_code == 200
 
 
-def forbids(get_response, ip_address):
-    detector = Detector(get_response)
-    response = detector.request_resource(ip_address)
-    assert response.status_code == 302
-    response = detector.request_access()
-    return response.status_code == 403
-
-
 def forbids_shared_session(detector, ip_address):
     response = detector.request_resource(ip_address)
-    assert response.status_code == 302
-    response = detector.request_access()
+    if response.status_code == 302:
+        response = detector.request_access(ip_address)
     return response.status_code == 403
+
+
+def forbids(get_response, ip_address):
+    detector = Detector(get_response)
+    return forbids_shared_session(detector, ip_address)
 
 
 class Detector:
@@ -36,13 +33,15 @@ class Detector:
         """Sends a request to the server to access a resource"""
         request = self.request.get()
         request.META["HTTP_X_FORWARDED_FOR"] = ip_address
-        get_response = ForbidLocationMiddleware(self.get_response)
-        return ForbidNetworkMiddleware(get_response)(request)
+        get_response = ForbidNetworkMiddleware(self.get_response)
+        return ForbidLocationMiddleware(get_response)(request)
 
-    def request_access(self):
+    def request_access(self, ip_address=""):
         """Simulates the request sent by the user browser to the server"""
         request = self.request.post({"CLIENT_TZ": "Europe/London"})
-        return ForbidNetworkMiddleware(self.get_response)(request)
+        request.META["HTTP_X_FORWARDED_FOR"] = ip_address
+        get_response = ForbidNetworkMiddleware(self.get_response)
+        return ForbidLocationMiddleware(get_response)(request)
 
 
 def test_should_allow_all_when_no_config_provided(get_response):

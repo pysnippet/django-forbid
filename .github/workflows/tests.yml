@@ -51,7 +51,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          python -m pip install -e .
+          sh build.sh
           pip install tox tox-gh-actions
       - name: Run tests using tox
         run: tox -e ${{ matrix.env }}
