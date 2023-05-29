@@ -3,9 +3,9 @@ from .skills.forbid_location import ForbidLocationMiddleware
 from .skills.forbid_network import ForbidNetworkMiddleware
 
 __skills__ = (
-    ForbidDeviceMiddleware,
-    ForbidLocationMiddleware,
     ForbidNetworkMiddleware,
+    ForbidLocationMiddleware,
+    ForbidDeviceMiddleware,
 )
 
 
