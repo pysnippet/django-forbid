@@ -51,7 +51,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          python -m pip install -e .
+          python setup.py sdist bdist_wheel
+          pip install dist/django_forbid-*.whl
           pip install tox tox-gh-actions
       - name: Run tests using tox
         run: tox -e ${{ matrix.env }}
