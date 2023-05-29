@@ -22,7 +22,17 @@ class ForbidNetworkMiddleware:
             for attr in response_attributes:
                 request.session.pop(attr)
 
+        def forbidden_page():
+            # Redirects to the FORBIDDEN_NET URL if set.
+            if Settings.has("OPTIONS.URL.FORBIDDEN_NET"):
+                return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_NET"))
+            return HttpResponseForbidden()
+
+        geoip2_tz = request.session.get("GEOIP2_TZ")
+        verified_tz = request.session.get("VERIFIED_TZ", "")
+
         if any([
+            verified_tz == geoip2_tz,
             # Checks if VPN is False or not set.
             not Settings.get("OPTIONS.VPN", False),
             # Checks if the request is an AJAX request.
@@ -33,19 +43,19 @@ class ForbidNetworkMiddleware:
         ]):
             return self.get_response(request)
 
+        # Checks if GEOIP2_TZ and VERIFIED_TZ don't exist.
+        if all([verified_tz, geoip2_tz != "N/A"]):
+            return forbidden_page()
+
         if all(map(request.session.has_key, ("GEOIP2_TZ", *response_attributes))):
             # Handles if the user's timezone differs from the
             # one determined by GeoIP API. If so, VPN is used.
-            verified_tz = request.session.get("VERIFIED_TZ")
-            geoip2_tz = request.session.get("GEOIP2_TZ")
             client_tz = request.POST.get("CLIENT_TZ", verified_tz)
 
             if geoip2_tz != "N/A" and client_tz != geoip2_tz:
+                request.session["VERIFIED_TZ"] = ""
                 erase_response_attributes()
-                # Redirects to the FORBIDDEN_NET URL if set.
-                if Settings.has("OPTIONS.URL.FORBIDDEN_NET"):
-                    return redirect(Settings.get("OPTIONS.URL.FORBIDDEN_NET"))
-                return HttpResponseForbidden()
+                return forbidden_page()
 
             # Restores the response from the session.
             response = HttpResponse(**{
