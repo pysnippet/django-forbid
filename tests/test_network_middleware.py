@@ -6,8 +6,8 @@ from tests import IP
 from tests import WSGIRequest
 
 
-def skips(get_response, ip_address, ajax=False):
-    detector = Detector(get_response, ajax=ajax)
+def skips(get_response, ip_address):
+    detector = Detector(get_response)
     response = detector.request_resource(ip_address)
     return response.status_code == 200
 
@@ -84,10 +84,3 @@ def test_should_allow_users_only_from_great_britain_with_shared_session(get_resp
     assert forbids_shared_session(detector, IP.ip_cobain)
     # Turn off VPN - back to London
     assert not forbids_shared_session(detector, IP.ip_london)
-
-
-@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
-def test_should_allow_ajax_requests(get_response):
-    """It should give access to the user when request is done by AJAX"""
-    for ip_address in IP.all:
-        assert skips(get_response, ip_address, True)
