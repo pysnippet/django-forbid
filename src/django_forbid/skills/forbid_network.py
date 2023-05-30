@@ -44,7 +44,7 @@ class ForbidNetworkMiddleware:
             return self.get_response(request)
 
         # Checks if GEOIP2_TZ and VERIFIED_TZ don't exist.
-        if all([verified_tz, geoip2_tz != "N/A"]):
+        if verified_tz and geoip2_tz != "N/A":
             return forbidden_page()
 
         if all(map(request.session.has_key, ("GEOIP2_TZ", *response_attributes))):
