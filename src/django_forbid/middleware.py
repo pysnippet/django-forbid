@@ -1,3 +1,5 @@
+import re
+
 from .skills.forbid_device import ForbidDeviceMiddleware
 from .skills.forbid_location import ForbidLocationMiddleware
 from .skills.forbid_network import ForbidNetworkMiddleware
@@ -14,8 +16,11 @@ class ForbidMiddleware:
 
     def __init__(self, get_response):
         self.get_response = get_response
+        self.regex = re.compile(r"\w+/(?:html|xhtml\+xml|xml)")
 
     def __call__(self, request):
-        for skill in __skills__:
-            self.get_response = skill(self.get_response)
-        return self.get_response(request)
+        get_response = self.get_response
+        if self.regex.search(request.META.get("HTTP_ACCEPT")):
+            for skill in __skills__:
+                get_response = skill(get_response)
+        return get_response(request)

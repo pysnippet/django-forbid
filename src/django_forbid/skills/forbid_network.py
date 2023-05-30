@@ -1,5 +1,4 @@
 import json
-import re
 
 from django.http import HttpResponse
 from django.http import HttpResponseForbidden
@@ -31,20 +30,11 @@ class ForbidNetworkMiddleware:
         geoip2_tz = request.session.get("GEOIP2_TZ")
         verified_tz = request.session.get("VERIFIED_TZ", "")
 
-        if any([
-            verified_tz == geoip2_tz,
-            # Checks if VPN is False or not set.
-            not Settings.get("OPTIONS.VPN", False),
-            # Checks if the request is an AJAX request.
-            not re.search(
-                r"\w+\/(?:html|xhtml\+xml|xml)",
-                request.META.get("HTTP_ACCEPT"),
-            ),
-        ]):
+        # Checks if the user's timezone match with the last accessed one.
+        if verified_tz == geoip2_tz or not Settings.get("OPTIONS.VPN", False):
             return self.get_response(request)
-
         # Checks if GEOIP2_TZ and VERIFIED_TZ don't exist.
-        if verified_tz and geoip2_tz != "N/A":
+        elif verified_tz and geoip2_tz != "N/A":
             return forbidden_page()
 
         if all(map(request.session.has_key, ("GEOIP2_TZ", *response_attributes))):
