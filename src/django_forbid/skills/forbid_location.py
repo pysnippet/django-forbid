@@ -20,6 +20,10 @@ class ForbidLocationMiddleware:
         address = request.META.get("REMOTE_ADDR")
         address = request.META.get("HTTP_X_FORWARDED_FOR", address)
         client_ip = address.split(",")[0].strip()
+        verified_ip = request.session.get("VERIFIED_IP", "")
+
+        if verified_ip and verified_ip == client_ip:
+            return self.get_response(request)
 
         try:
             city = geoip.city(client_ip)
@@ -47,7 +51,11 @@ class ForbidLocationMiddleware:
             request.session["GEOIP2_TZ"] = timezone
 
         if granted:
+            request.session["VERIFIED_IP"] = client_ip
             return self.get_response(request)
+
+        # Erases the timezone from the session.
+        request.session["VERIFIED_IP"] = ""
 
         # Redirects to the FORBIDDEN_LOC URL if set.
         if Settings.has("OPTIONS.URL.FORBIDDEN_LOC"):
