@@ -9,6 +9,14 @@ wsgi = WSGIRequest()
 request = wsgi.get()
 
 
+def skips_ajax(get_response, ip_address):
+    wsgi_ajax = WSGIRequest(True)
+    request_ajax = wsgi_ajax.get()
+    request_ajax.META["HTTP_X_FORWARDED_FOR"] = ip_address
+    response = ForbidMiddleware(get_response)(request_ajax)
+    return response.status_code == 200
+
+
 def forbids(get_response, request):
     response = ForbidMiddleware(get_response)(request)
     client_ip = request.META["HTTP_X_FORWARDED_FOR"]
@@ -80,3 +88,10 @@ def test_should_allow_users_only_from_great_britain_with_shared_session(get_resp
     # Turn off VPN - back to London
     request.META["HTTP_X_FORWARDED_FOR"] = IP.ip_london
     assert not forbids(get_response, request)
+
+
+@override_settings(DJANGO_FORBID={"OPTIONS": {"VPN": True}})
+def test_should_allow_ajax_requests(get_response):
+    """It should give access to the user when request is done by AJAX"""
+    for ip_address in IP.all:
+        assert skips_ajax(get_response, ip_address)
