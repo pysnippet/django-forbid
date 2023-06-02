@@ -42,6 +42,13 @@ jobs:
           - python: "3.11"
             env: py311-django41
 
+          - python: "3.9"
+            env: py39-django42
+          - python: "3.10"
+            env: py310-django42
+          - python: "3.11"
+            env: py311-django42
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python }}
