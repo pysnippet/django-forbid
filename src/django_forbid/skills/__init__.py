@@ -52,13 +52,13 @@ class Access:
 
     def grants(self, attribute_type):
         # Creates a regular expression in the following form:
-        # ^(?=PERMITTED_ATTRIBUTES)(?:(?!FORBIDDEN_ATTRIBUTES)\w)+$
-        # where the list of forbidden and permitted attributes are
-        # filtered from the ATTRIBUTES setting by the "!" prefix.
+        # ^(?=PERMITTED_ATTRIBUTES)(?:(?!FORBIDDEN_ATTRIBUTES)\w+(?::\w+)?)$
+        # where the list of forbidden and permitted attributes is determined
+        # by filtering the particular setting attributes by the "!" prefix.
         permit = r"|".join(filter(self.permitted, self.attributes))
         forbid = r"|".join(map(self.normalize, filter(self.forbidden, self.attributes)))
         forbid = r"(?!" + forbid + r")" if forbid else ""
-        regexp = r"^(?=" + permit + r")(?:" + forbid + r"\w)+$"
+        regexp = r"^(?=" + permit + r")(?:" + forbid + r"\w+(?::\w+)?)$"
 
         # Regexp designed to match the permitted attributes.
         return re.match(regexp, attribute_type)
