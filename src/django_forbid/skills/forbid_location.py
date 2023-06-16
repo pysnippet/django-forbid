@@ -30,8 +30,12 @@ class ForbidLocationMiddleware:
 
             countries = Settings.get("COUNTRIES", [])
             territories = Settings.get("TERRITORIES", [])
+            country_state_code = city.get("region")
+            country_identifier = city.get("country_code")
+            if country_state_code:
+                country_identifier += ":%s" % country_state_code
             granted = all([
-                Access(countries).grants(city.get("country_code")),
+                Access(countries).grants(country_identifier),
                 Access(territories).grants(city.get("continent_code")),
             ])
         except (AddressNotFoundError, Exception):
