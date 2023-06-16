@@ -51,7 +51,7 @@ def test_should_forbid_users_when_country_in_territories_blacklist(get_response)
     """Should forbid access to users from territories in blacklist."""
     for ip_address in IP.all:
         request.META["HTTP_X_FORWARDED_FOR"] = ip_address
-        if ip_address in [*IP.locals, IP.ip_cobain]:
+        if ip_address in [*IP.locals, IP.ip_cobain, IP.ip_dallas]:
             assert forbids(get_response, request)
             continue
         assert not forbids(get_response, request)
