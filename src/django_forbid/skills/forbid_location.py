@@ -1,3 +1,5 @@
+import itertools
+
 from django.conf import settings
 from django.contrib.gis.geoip2 import GeoIP2
 from django.http import HttpResponseForbidden
@@ -6,6 +8,7 @@ from geoip2.errors import AddressNotFoundError
 
 from . import Access
 from . import Settings
+from . import continents_codes
 
 
 class ForbidLocationMiddleware:
@@ -30,8 +33,19 @@ class ForbidLocationMiddleware:
 
             countries = Settings.get("COUNTRIES", [])
             territories = Settings.get("TERRITORIES", [])
+            country_state_code = city.get("region")
+            country_identifier = city.get("country_code")
+
+            if territories:
+                # Adds the continent codes of the countries that are forbidden partially.
+                territories = list({*territories, *itertools.chain.from_iterable(
+                    map(continents_codes.__getitem__, filter(bool, map(Access.getattr, countries)))
+                )})
+
+            if country_state_code:
+                country_identifier += ":%s" % country_state_code
             granted = all([
-                Access(countries).grants(city.get("country_code")),
+                Access(countries).grants(country_identifier),
                 Access(territories).grants(city.get("continent_code")),
             ])
         except (AddressNotFoundError, Exception):

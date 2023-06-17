@@ -7,6 +7,7 @@ class IP:
     ip_local2 = "127.0.0.1"
     ip_london = "212.102.63.59"
     ip_zurich = "146.70.99.178"
+    ip_dallas = "198.96.95.234"
     ip_cobain = "104.129.57.189"
 
     locals = [
@@ -20,6 +21,7 @@ class IP:
         ip_london,
         ip_zurich,
         ip_cobain,
+        ip_dallas,
     ]
 
 

@@ -33,6 +33,36 @@ def test_should_forbid_all_when_production_mode(get_response):
         assert forbids(get_response, ip_address)
 
 
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["US:WA"]})
+def test_should_allow_users_only_from_washington(get_response):
+    """Access is granted from Washington."""
+    for ip_address in IP.all:
+        if ip_address != IP.ip_cobain:
+            assert forbids(get_response, ip_address)
+            continue
+        assert not forbids(get_response, ip_address)
+
+
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["!US:TX"]})
+def test_should_forbid_users_only_from_texas(get_response):
+    """Access is forbidden from Texas."""
+    for ip_address in IP.all:
+        if ip_address in [*IP.locals, IP.ip_dallas]:
+            assert forbids(get_response, ip_address)
+            continue
+        assert not forbids(get_response, ip_address)
+
+
+@override_settings(DJANGO_FORBID={"COUNTRIES": ["!US:TX", "!US:IL", "GB"], "TERRITORIES": ["EU"]})
+def test_should_forbid_users_only_from_texas_and_illinois(get_response):
+    """Access is forbidden from Texas and Illinois."""
+    for ip_address in IP.all:
+        if ip_address in [*IP.locals, IP.ip_dallas]:
+            assert forbids(get_response, ip_address)
+            continue
+        assert not forbids(get_response, ip_address)
+
+
 @override_settings(DJANGO_FORBID={"COUNTRIES": ["GB"]})
 def test_should_allow_country_when_country_in_countries_whitelist_otherwise_forbid(get_response):
     """Access is granted from GB when GB is in the counties' whitelist."""
