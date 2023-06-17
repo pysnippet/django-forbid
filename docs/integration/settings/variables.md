@@ -43,6 +43,12 @@ The list of countries to permit or forbid access to. The list accepts country co
 the ones starting with the `!` prefix are forbidden. The list of all codes can be
 found [here](https://www.iban.com/country-codes).
 
+Also, you can permit or forbid access to a certain state of the country by specifying the state code after the country
+code is joined with a `:` symbol. For example, `!US:TX` will forbid access to Texas by permitting the rest of the
+mentioned country states. With the same principle, the `US:CA` will permit access to California only. The list of all US
+state codes can be found [here](https://wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States). This
+declaration method can be used with all countries having states/districts.
+
 ## Territories
 
 - Key: `TERRITORIES`

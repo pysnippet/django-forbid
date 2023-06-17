@@ -40,5 +40,5 @@ DJANGO_FORBID = {
 ```
 
 In this example, the Django Forbid will permit access to users using the listed devices and forbid entry to users
-worldwide except for the US, UK, and EU countries. It will also forbid access to the users who use VPN to lie about
+worldwide except for the US, GB, and EU countries. It will also forbid access to the users who use VPN to lie about
 their geolocation. The settings also define the URLs to redirect to when access is forbidden.
