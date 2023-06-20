@@ -25,7 +25,8 @@ class ForbidLocationMiddleware:
         client_ip = address.split(",")[0].strip()
         verified_ip = request.session.get("VERIFIED_IP", "")
 
-        if verified_ip and verified_ip == client_ip:
+        # Skips if user IP is verified.
+        if verified_ip == client_ip:
             return self.get_response(request)
 
         try:

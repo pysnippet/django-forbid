@@ -23,13 +23,14 @@ class ForbidDeviceMiddleware:
 
         devices = Settings.get("DEVICES", [])
         device_type = request.session.get("DEVICE")
+        http_ua = request.META.get("HTTP_USER_AGENT")
+        verified_ua = request.session.get("VERIFIED_UA", "")
 
-        # Skip if DEVICES empty.
-        if not devices:
+        # Skips if DEVICES empty or user agent is verified.
+        if not devices or verified_ua == http_ua:
             return self.get_response(request)
 
         if not device_type:
-            http_ua = request.META.get("HTTP_USER_AGENT")
             device_detector = DeviceDetector(http_ua)
             device_detector = device_detector.parse()
             device = device_detector.device_type()
@@ -37,7 +38,11 @@ class ForbidDeviceMiddleware:
             request.session["DEVICE"] = device_type
 
         if Access(devices).grants(device_type):
+            request.session["VERIFIED_UA"] = http_ua
             return self.get_response(request)
+
+        # Erases the user agent from the session.
+        request.session["VERIFIED_UA"] = ""
 
         # Redirects to the FORBIDDEN_DEV URL if set.
         if Settings.has("OPTIONS.URL.FORBIDDEN_DEV"):
