@@ -7,7 +7,7 @@
     "serve": "vitepress serve"
   },
   "dependencies": {
-    "vitepress": "^1.0.0-alpha.75",
+    "vitepress": "^1.0.0-rc.4",
     "vue": "^3.3.2"
   }
 }
