@@ -1,7 +1,10 @@
 export default {
     title: "Django Forbid",
     description: "Manage access to your Django apps",
-    head: [["link", {rel: "icon", type: "image/x-icon", href: "/logo.png"}]],
+    head: [
+        ["link", {rel: "icon", type: "image/x-icon", href: "/logo.png"}],
+        ["link", {href: "/index.css", rel: "stylesheet"}],
+    ],
     cleanUrls: true,
     lang: "en-US",
     base: "/django-forbid/",
