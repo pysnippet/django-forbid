@@ -20,7 +20,8 @@ class ForbidMiddleware:
 
     def __call__(self, request):
         get_response = self.get_response
-        if self.regex.search(request.META.get("HTTP_ACCEPT")):
+        http_accept = request.META.get("HTTP_ACCEPT")
+        if isinstance(http_accept, (bytes, str)) and self.regex.search(http_accept):
             for skill in __skills__:
                 get_response = skill(get_response)
         return get_response(request)
