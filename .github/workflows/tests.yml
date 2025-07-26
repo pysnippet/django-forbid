@@ -8,23 +8,21 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - python: "3.6"
-            env: py36-django21
-            os: ubuntu-20.04  # 3.6 is not available on ubuntu-20.04
+          - python: "3.7"
+            env: py37-django21
           - python: "3.8"
             env: py38-django21
           - python: "3.9"
             env: py39-django21
 
-          - python: "3.6"
-            env: py36-django32
-            os: ubuntu-20.04  # 3.6 is not available on ubuntu-20.04
           - python: "3.8"
             env: py38-django32
+          - python: "3.9"
+            env: py39-django32
           - python: "3.10"
             env: py310-django32
 
@@ -48,6 +46,20 @@ jobs:
             env: py310-django42
           - python: "3.11"
             env: py311-django42
+
+          - python: "3.9"
+            env: py39-django51
+          - python: "3.10"
+            env: py310-django51
+          - python: "3.11"
+            env: py311-django51
+
+          - python: "3.9"
+            env: py39-django52
+          - python: "3.10"
+            env: py310-django52
+          - python: "3.11"
+            env: py311-django52
 
     steps:
       - uses: actions/checkout@v2
