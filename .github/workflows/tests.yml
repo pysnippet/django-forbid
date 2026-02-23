@@ -59,12 +59,12 @@ jobs:
           - python: "3.12"
             env: py312-django52
 
+          - python: "3.11"
+            env: py311-django60
           - python: "3.12"
             env: py312-django60
           - python: "3.13"
             env: py313-django60
-          - python: "3.14"
-            env: py314-django60
 
     steps:
       - uses: actions/checkout@v2
