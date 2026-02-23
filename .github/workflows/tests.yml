@@ -59,8 +59,6 @@ jobs:
           - python: "3.12"
             env: py312-django52
 
-          - python: "3.11"
-            env: py311-django60
           - python: "3.12"
             env: py312-django60
           - python: "3.13"
