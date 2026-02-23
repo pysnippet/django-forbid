@@ -1,3 +1,4 @@
 tox==3.24.3
 pytest==6.2.5
+pluggy>=1.2.0
 pytest-django==4.5.2
